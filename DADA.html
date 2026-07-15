@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DADA GPC Builder – ARC RAIDERS Script-Konfigurator</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #1c2330;
+  --border: #2d3646;
+  --text: #e6edf3;
+  --dim: #8b98a9;
+  --accent: #ff8c1a;
+  --accent2: #29b6f6;
+  --ok: #3fb950;
+  --warn: #f0b429;
+  --err: #f85149;
+  font-size: 15px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.45;
+  padding-bottom: 90px;
+}
+header {
+  background: linear-gradient(180deg, #161b22, #0d1117);
+  border-bottom: 2px solid var(--accent);
+  padding: 22px 28px 16px;
+}
+header h1 {
+  font-size: 1.7rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+header h1 span { color: var(--text); }
+header p.sub { color: var(--dim); margin-top: 4px; font-size: .95rem; }
+.steps { display: flex; gap: 18px; margin-top: 12px; flex-wrap: wrap; }
+.steps div {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 14px; font-size: .85rem; color: var(--dim);
+}
+.steps b { color: var(--accent2); margin-right: 6px; }
+main { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+section.panel {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; margin-bottom: 18px;
+}
+section.panel > h2 {
+  font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--accent2); margin-bottom: 12px;
+}
+.globals { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
+.globals .field { display: flex; align-items: center; gap: 9px; }
+.globals label { color: var(--dim); font-size: .9rem; }
+input[type="text"] {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); padding: 5px 9px; font-size: .9rem;
+}
+input.ver { width: 44px; text-align: center; }
+input.wide { width: 240px; }
+select {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); padding: 5px 8px; font-size: .88rem;
+}
+/* Toggle-Switch */
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .knob {
+  position: absolute; cursor: pointer; inset: 0; background: #39424f;
+  border-radius: 22px; transition: .15s;
+}
+.switch .knob:before {
+  content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px;
+  background: #cfd8e3; border-radius: 50%; transition: .15s;
+}
+.switch input:checked + .knob { background: var(--ok); }
+.switch input:checked + .knob:before { transform: translateX(18px); }
+.switch input:disabled + .knob { opacity: .35; cursor: not-allowed; }
+/* Seiten-Karten */
+#pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; transition: border-color .15s;
+}
+.card.off { opacity: .55; }
+.card.on { border-color: #3d5a3f; }
+.card > .head {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: var(--bg3); cursor: pointer; user-select: none;
+}
+.card > .head .num {
+  background: var(--accent); color: #10151c; font-weight: 700; border-radius: 6px;
+  min-width: 30px; text-align: center; padding: 2px 0; font-size: .85rem;
+}
+.card.off > .head .num { background: #39424f; color: var(--dim); }
+.card > .head .title { font-weight: 600; letter-spacing: .5px; flex: 1; }
+.card > .head .title small { display: block; color: var(--dim); font-weight: 400; font-size: .78rem; }
+.card .body { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.row > label { color: var(--dim); font-size: .88rem; flex: 1; }
+.row .val { min-width: 46px; text-align: right; color: var(--accent2); font-weight: 600; font-size: .9rem; font-variant-numeric: tabular-nums; }
+input[type="range"] { flex: 2; accent-color: var(--accent); min-width: 110px; }
+.featrow {
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+}
+.featrow .fname { flex: 1; font-size: .87rem; }
+.featrow .fname small { display: block; color: var(--dim); font-size: .74rem; }
+.featrow .deflabel { color: var(--dim); font-size: .74rem; }
+.featrow.disabled { opacity: .45; }
+.hint { color: var(--dim); font-size: .78rem; font-style: italic; }
+/* Warnungen */
+#warnings { display: flex; flex-direction: column; gap: 6px; }
+#warnings .w {
+  background: #2b2111; border: 1px solid #6b5618; color: var(--warn);
+  border-radius: 7px; padding: 7px 12px; font-size: .87rem;
+}
+/* Vorschau */
+#previewWrap textarea {
+  width: 100%; height: 420px; background: #0a0e14; color: #9fd0a0;
+  border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+  font-family: Consolas, monospace; font-size: .78rem; white-space: pre;
+  resize: vertical;
+}
+#previewStats { color: var(--dim); font-size: .85rem; margin: 8px 0; }
+/* Aktionsleiste */
+#actionbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(13,17,23,.95); border-top: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+  display: flex; gap: 12px; align-items: center; justify-content: center;
+  padding: 13px 20px; flex-wrap: wrap;
+}
+button {
+  border: none; border-radius: 8px; padding: 10px 22px; font-size: .95rem;
+  font-weight: 600; cursor: pointer; letter-spacing: .3px;
+}
+button.primary { background: var(--accent); color: #10151c; }
+button.primary:hover { filter: brightness(1.12); }
+button.ghost {
+  background: transparent; color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+button.ghost:hover { background: rgba(41,182,246,.12); }
+button.small { padding: 6px 14px; font-size: .85rem; }
+#pageCount { color: var(--dim); font-size: .85rem; }
+#pageCount b { color: var(--accent); }
+footer { text-align: center; color: var(--dim); font-size: .8rem; padding: 20px; }
+a { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>DADA <span>GPC BUILDER</span></h1>
+  <p class="sub">Stell dir dein persönliches ARC RAIDERS Script (RAW-Edition) zusammen – Seiten wählen, Standardwerte setzen, fertige .gpc-Datei herunterladen.</p>
+  <div class="steps">
+    <div><b>1</b> Seiten &amp; Features auswählen</div>
+    <div><b>2</b> Standardwerte einstellen</div>
+    <div><b>3</b> .gpc herunterladen</div>
+    <div><b>4</b> In Zen Studio kompilieren &amp; flashen</div>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Globale Einstellungen</h2>
+    <div class="globals">
+      <div class="field">
+        <label>Version</label>
+        <input type="text" class="ver" id="ver1" maxlength="1" value="4">
+        <input type="text" class="ver" id="ver2" maxlength="1" value="0">
+        <input type="text" class="ver" id="ver3" maxlength="1" value="0">
+      </div>
+      <div class="field">
+        <label for="ps5">Plattform-Symbole</label>
+        <select id="ps5">
+          <option value="0">XBOX</option>
+          <option value="1">PS5</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="switch"><input type="checkbox" id="screensaver" checked><span class="knob"></span></label>
+        <label for="screensaver">Bildschirmschoner (OLED nach 2&nbsp;Sek. aus)</label>
+      </div>
+      <div class="field">
+        <label>Discord-Link</label>
+        <input type="text" class="wide" id="discord" value="discord.gg/W825gUj6Nn">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="warnPanel" style="display:none">
+    <h2>Hinweise</h2>
+    <div id="warnings"></div>
+  </section>
+
+  <div id="pages"></div>
+
+  <section class="panel" id="previewWrap" style="margin-top:18px">
+    <h2>Script-Vorschau <button class="ghost small" id="togglePreview" style="margin-left:10px">anzeigen</button></h2>
+    <div id="previewStats"></div>
+    <textarea id="preview" readonly spellcheck="false" style="display:none"></textarea>
+  </section>
+</main>
+
+<div id="actionbar">
+  <span id="pageCount"></span>
+  <button class="primary" id="download">&#128190; GPC herunterladen</button>
+  <button class="ghost" id="exportPreset">Preset exportieren</button>
+  <button class="ghost" id="importPreset">Preset importieren</button>
+  <button class="ghost" id="resetCfg">Zurücksetzen</button>
+  <input type="file" id="importFile" accept=".json" style="display:none">
+</div>
+
+<footer>DADA GPC BUILDER · basiert auf RAW 40.0 · Support: <span id="footerDiscord">discord.gg/W825gUj6Nn</span></footer>
+
+<script>
+"use strict";
+// ============================================================================
+// GPC-CORE: unveränderliche Code-Blöcke aus RAW 40.0 (Skelett)
+// ============================================================================
+
+const GPC_TABLES = `const int16 cosTableCircle[] = {
+  100, 98, 92, 83, 71, 56, 38, 20, 0, -20, -38, -56, -71, -83, -92, -98,
+  -100, -98, -92, -83, -71, -56, -38, -20, 0, 20, 38, 56, 71, 83, 92, 98,
+  100, 98, 92, 83, 71, 56, 38, 20, 0, -20, -38, -56, -71, -83, -92, -98,
+  -100, -98, -92, -83, -71, -56, -38, -20, 0, 20, 38, 56, 71, 83, 92, 98
+};
+const int16 sinTableCircle[] = {
+  0, 20, 38, 56, 71, 83, 92, 98, 100, 98, 92, 83, 71, 56, 38, 20,
+  0, -20, -38, -56, -71, -83, -92, -98, -100, -98, -92, -83, -71, -56, -38, -20,
+  0, 20, 38, 56, 71, 83, 92, 98, 100, 98, 92, 83, 71, 56, 38, 20,
+  0, -20, -38, -56, -71, -83, -92, -98, -100, -98, -92, -83, -71, -56, -38, -20
+};
+`;
+
+const GPC_VARS = `// --- PROFILE SYSTEM VARIABLES ---
+int profile_mode;
+int m2_prof;
+int m5_prof;
+int active_prof;
+int no_gun_state;
+int pickaxe_state;
+
+int p1[8];
+int p2[8];
+int p3[8];
+int p4[8];
+int p5[8];
+int p6[8];
+
+int idx;
+int p_1; int p_2; int p_3; int p_4; int p_5;
+int pack_sys;
+
+// --- SETTINGS VARIABLES ---
+int val_recoil;
+int val_aim; int val_aa_speed; int val_jump; int val_rapid; int val_fire;
+int smart_x;
+int tog_recoil; int tog_aim; int tog_jump; int tog_rapid;
+int tog_fire;
+int tog_smart; int tog_ssh; int ssh_trigger; int tog_dontshoot;
+int ds_delay; int ds_hold; int ds_trigger; int ds_running;
+int ds_timer;
+int ds_rand; int ds_time_edit_mode; int ds_btn_edit_mode;
+int noise_counter; int time_in_rs; int ry_val;
+int tog_aim_fire; int tog_rec_fire; int tog_smart_fire; int rf_led_mode;
+int tog_ps5; int snap_btn; int icon_btn;
+
+int tog_autoping; int tog_hairtrig; int tog_easysprint; int tog_flipped;
+int tog_norumble; int tog_mfix; int feature_idx; int val_ping_cd; int feat_max; int tog_gunswap; int ping_cd_timer;
+int tog_dropshot; int tog_jumpshot; int tog_dj_combo; int dj_idx; int dj_feat_max;
+int notify_msg; int notify_timer;
+int val_ds_spam; int val_js_spam; int ds_spam_timer; int js_spam_timer;
+int flipped_tmp_rt; int flipped_tmp_lt;
+
+// --- M2 SYNC VARIABLES ---
+int other_idx;
+int o_rec; int o_smt; int o_aim; int o_jmp; int o_rap; int o_fir;
+int o_af; int o_rf; int o_sf; int o_led;
+
+// --- SYSTEM VARIABLES ---
+int edit_active; int page_index;
+int boot_active; int boot_timer; int saver_timer;
+int led_brightness; int show_display;
+int db_timer; int db_running;
+int rl_timer; int rl_wait; int rl_hold;
+int noise; int jump_wait;
+int d_val;
+int d_x; int d_y; int sx; int sy; int digit_num;
+int p_x; int box_x; int box_y; int box_fill; int show_text;
+int final_rx; int final_ry;
+int ar_timer; int ar_max; int ar_now;
+int smart_x_now; int circle_step; int circle_acc; int aa_x; int aa_y; int aa_radius;
+int aa_stick_mag; int aa_damp; int aa_micro_scale;
+int math_temp; int target_hz; int rf_shuffle; int aa_active; int rec_active;
+int led_pulse_timer; int nav_timer; int safety_timer; int text_timer;
+int fsh_edit_mode;
+int fsh_blink_timer; int fsh_timer;
+int rgb_timer; int r; int g; int b; int cx; int cy;
+int int_p; int frac_p;
+int sprint_active;
+`;
+
+// init: Laden-Zweig (EEPROM vorhanden) + Abschluss – immer identisch
+const GPC_INIT_LOAD = `    } else {
+        pack_sys = get_pvar( SPVAR_33, 0, 32767, 0 );
+        profile_mode = pack_sys & 3;
+        m2_prof = ( pack_sys >> 2 ) & 3;
+        m5_prof = ( pack_sys >> 4 ) & 7;
+        tog_ps5 = ( pack_sys >> 7 ) & 1;
+        tog_flipped = ( pack_sys >> 8 ) & 1;
+        LoadAllFromEEPROM();
+        UpdateActiveProf();
+        LoadFromRAM();
+    }
+
+    edit_active = 0;
+    page_index  = 0; saver_timer = 0; feature_idx = 0;
+    boot_active = 1; boot_timer  = 0; circle_step = 0; circle_acc = 0; ar_timer = 0; notify_msg = 0; notify_timer = 0; ds_spam_timer = 9999; js_spam_timer = 9999;
+    ds_running = 0; ds_time_edit_mode = 0; ds_btn_edit_mode = 0; text_timer = 0;
+    no_gun_state = 0; pickaxe_state = 0; sprint_active = 0;
+    set_rgb( 0, 0, 100 );
+}
+`;
+
+// M2-Y-Tasten-Logik im Gameplay (Pickaxe / No-Gun / Profilwechsel) – immer enthalten
+const GPC_M2_Y_LOGIC = `            if ( profile_mode == 1 ) {
+                if ( event_press( XB1_LEFT ) ) {
+                    pickaxe_state = 1;
+                    no_gun_state = 0;
+                }
+
+                if ( event_release( XB1_Y ) ) {
+                    if ( get_ptime( XB1_Y ) < 200 ) {
+                        if ( pickaxe_state ) {
+                            pickaxe_state = 0;
+                        } else if ( no_gun_state ) {
+                            no_gun_state = 0;
+                        } else {
+                            if ( m2_prof == 1 ) m2_prof = 2;
+                            else m2_prof = 1;
+                            UpdateActiveProf();
+                            LoadFromRAM();
+                        }
+                    } else {
+                        no_gun_state = 1;
+                        pickaxe_state = 0;
+                    }
+                }
+            }
+`;
+
+// Menü gehalten: Profil-/Modus-Wechsel (mfix-Gate wird vom Generator eingesetzt)
+function gpcMenuHold(mfixGate) {
+  return `        if ( get_val( MENU_BTN ) ) {
+            edit_active = 1;
+            saver_timer = 0; safety_timer = 0;
+
+            set_val( XB1_Y, 0 );
+            set_val( PROF_BTN, 0 );
+
+            if ( ${mfixGate}event_press( PROF_BTN ) ) {
+                profile_mode = profile_mode + 1;
+                if ( profile_mode > 2 ) profile_mode = 0;
+                SaveSystem();
+                UpdateActiveProf();
+                LoadFromRAM();
+                combo_run( c_NotifyMode );
+            }
+
+            if ( event_press( XB1_Y ) ) {
+                if ( profile_mode == 1 ) {
+                    if ( m2_prof == 1 ) m2_prof = 2;
+                    else m2_prof = 1;
+                    no_gun_state = 0;
+                    pickaxe_state = 0;
+                    SaveSystem();
+                    UpdateActiveProf();
+                    LoadFromRAM();
+                    combo_run( c_NotifyProfile );
+                }
+                else if ( profile_mode == 2 ) {
+                    m5_prof = m5_prof + 1;
+                    if ( m5_prof > 5 ) m5_prof = 1;
+                    SaveSystem();
+                    UpdateActiveProf();
+                    LoadFromRAM();
+                    combo_run( c_NotifyProfile );
+                }
+            }
+
+        }`;
+}
+
+// Boot-Anzeige im main – immer enthalten
+const GPC_BOOT_MAIN = `    if ( boot_active ) {
+        boot_timer = boot_timer + get_rtime();
+        combo_run( DrawTerminalBoot );
+        if ( boot_timer > 2200 ) {
+            boot_active = 0;
+            cls_oled( 0 );
+            set_rgb( 0, 0, 100 );
+        }
+    } else {
+`;
+
+// Persistenz + Profilsystem – Bit-Packing bleibt 1:1 wie im Original
+const GPC_PERSIST = `function UpdateActiveProf() {
+    if ( profile_mode == 0 ) active_prof = 1;
+    if ( profile_mode == 1 ) active_prof = 1 + m2_prof;
+    if ( profile_mode == 2 ) active_prof = 3 + m5_prof;
+}
+
+function LoadAllFromEEPROM() {
+    p1[0] = get_pvar( SPVAR_1, 0, 32767, 0 ); p2[0] = get_pvar( SPVAR_2, 0, 32767, 0 ); p3[0] = get_pvar( SPVAR_3, 0, 32767, 0 ); p4[0] = get_pvar( SPVAR_4, 0, 32767, 0 );
+    p1[1] = get_pvar( SPVAR_5, 0, 32767, 0 ); p2[1] = get_pvar( SPVAR_6, 0, 32767, 0 ); p3[1] = get_pvar( SPVAR_7, 0, 32767, 0 ); p4[1] = get_pvar( SPVAR_8, 0, 32767, 0 );
+    p1[2] = get_pvar( SPVAR_9, 0, 32767, 0 ); p2[2] = get_pvar( SPVAR_10, 0, 32767, 0 ); p3[2] = get_pvar( SPVAR_11, 0, 32767, 0 ); p4[2] = get_pvar( SPVAR_12, 0, 32767, 0 );
+    p1[3] = get_pvar( SPVAR_13, 0, 32767, 0 ); p2[3] = get_pvar( SPVAR_14, 0, 32767, 0 ); p3[3] = get_pvar( SPVAR_15, 0, 32767, 0 ); p4[3] = get_pvar( SPVAR_16, 0, 32767, 0 );
+    p1[4] = get_pvar( SPVAR_17, 0, 32767, 0 ); p2[4] = get_pvar( SPVAR_18, 0, 32767, 0 ); p3[4] = get_pvar( SPVAR_19, 0, 32767, 0 ); p4[4] = get_pvar( SPVAR_20, 0, 32767, 0 );
+    p1[5] = get_pvar( SPVAR_21, 0, 32767, 0 ); p2[5] = get_pvar( SPVAR_22, 0, 32767, 0 ); p3[5] = get_pvar( SPVAR_23, 0, 32767, 0 ); p4[5] = get_pvar( SPVAR_24, 0, 32767, 0 );
+    p1[6] = get_pvar( SPVAR_25, 0, 32767, 0 ); p2[6] = get_pvar( SPVAR_26, 0, 32767, 0 ); p3[6] = get_pvar( SPVAR_27, 0, 32767, 0 ); p4[6] = get_pvar( SPVAR_28, 0, 32767, 0 );
+    p1[7] = get_pvar( SPVAR_29, 0, 32767, 0 ); p2[7] = get_pvar( SPVAR_30, 0, 32767, 0 ); p3[7] = get_pvar( SPVAR_31, 0, 32767, 0 ); p4[7] = get_pvar( SPVAR_32, 0, 32767, 0 );
+
+    p5[0] = get_pvar( SPVAR_35, 0, 32767, 0 ); p5[1] = get_pvar( SPVAR_36, 0, 32767, 0 ); p5[2] = get_pvar( SPVAR_37, 0, 32767, 0 ); p5[3] = get_pvar( SPVAR_38, 0, 32767, 0 );
+    p5[4] = get_pvar( SPVAR_39, 0, 32767, 0 ); p5[5] = get_pvar( SPVAR_40, 0, 32767, 0 ); p5[6] = get_pvar( SPVAR_41, 0, 32767, 0 ); p5[7] = get_pvar( SPVAR_42, 0, 32767, 0 );
+    p6[0] = get_pvar( SPVAR_43, 0, 32767, 0 ); p6[1] = get_pvar( SPVAR_44, 0, 32767, 0 ); p6[2] = get_pvar( SPVAR_45, 0, 32767, 0 ); p6[3] = get_pvar( SPVAR_46, 0, 32767, 0 );
+    p6[4] = get_pvar( SPVAR_47, 0, 32767, 0 ); p6[5] = get_pvar( SPVAR_48, 0, 32767, 0 ); p6[6] = get_pvar( SPVAR_49, 0, 32767, 0 ); p6[7] = get_pvar( SPVAR_50, 0, 32767, 0 );
+}
+
+function LoadFromRAM() {
+    idx = active_prof - 1;
+    p_1 = p1[idx]; p_2 = p2[idx]; p_3 = p3[idx]; p_4 = p4[idx]; p_5 = p5[idx];
+
+    tog_recoil = p_1 & 1; tog_smart = ( p_1 >> 1 ) & 1; tog_aim = ( p_1 >> 2 ) & 1; tog_jump = ( p_1 >> 3 ) & 1;
+    tog_rapid = ( p_1 >> 4 ) & 1; tog_fire = ( p_1 >> 5 ) & 1; tog_ssh = ( p_1 >> 6 ) & 1;
+    tog_dontshoot = ( p_1 >> 7 ) & 1; tog_aim_fire = ( p_1 >> 8 ) & 1;
+    tog_rec_fire = ( p_1 >> 9 ) & 1; tog_smart_fire = ( p_1 >> 10 ) & 1; rf_led_mode = ( p_1 >> 11 ) & 7;
+
+    val_recoil = (p_2 % 41) - 20; p_2 = p_2 / 41;
+    val_aim = p_2 % 11; p_2 = p_2 / 11;
+    val_jump = p_2;
+
+    ssh_trigger = p_3 % 26; p_3 = p_3 / 26;
+    ds_trigger = p_3 % 26; p_3 = p_3 / 26;
+    smart_x = p_3 - 20;
+
+    val_fire = p_4 % 11; p_4 = p_4 / 11;
+    ds_delay = ( p_4 % 11 ) * 50; p_4 = p_4 / 11;
+    ds_hold = ( p_4 % 11 ) * 50; p_4 = p_4 / 11;
+    val_rapid = p_4;
+
+    tog_autoping = p_5 & 1; tog_hairtrig = ( p_5 >> 1 ) & 1; tog_easysprint = ( p_5 >> 2 ) & 1; tog_norumble = ( p_5 >> 3 ) & 1; tog_mfix = ( p_5 >> 4 ) & 1;
+    val_aa_speed = ( ( p_5 >> 5 ) & 15 ) + 1; if ( val_aa_speed < 1 ) val_aa_speed = 1; if ( val_aa_speed > 10 ) val_aa_speed = 10;
+    val_ping_cd = ( p_5 >> 9 ) & 7; if ( val_ping_cd > 5 ) val_ping_cd = 0;
+    tog_gunswap = ( p_5 >> 12 ) & 1;
+    tog_dropshot = ( p_5 >> 13 ) & 1; tog_jumpshot = ( p_5 >> 14 ) & 1;
+    val_ds_spam = p6[idx] & 7; if ( val_ds_spam > 5 ) val_ds_spam = 0;
+    val_js_spam = ( p6[idx] >> 3 ) & 7; if ( val_js_spam > 5 ) val_js_spam = 0;
+    tog_dj_combo = ( p6[idx] >> 6 ) & 1;
+}
+
+function SaveToRAM() {
+    idx = active_prof - 1;
+    p1[idx] = tog_recoil | ( tog_smart << 1 ) | ( tog_aim << 2 ) | ( tog_jump << 3 ) |
+    ( tog_rapid << 4 ) | ( tog_fire << 5 ) | ( tog_ssh << 6 ) | ( tog_dontshoot << 7 ) |
+    ( tog_aim_fire << 8 ) | ( tog_rec_fire << 9 ) | ( tog_smart_fire << 10 ) | ( rf_led_mode << 11 );
+
+    p2[idx] = (val_recoil + 20) + ( val_aim * 41 ) + ( val_jump * 451 );
+    p3[idx] = ssh_trigger + ( ds_trigger * 26 ) + ( ( smart_x + 20 ) * 676 );
+    p4[idx] = val_fire + ( ( ds_delay / 50 ) * 11 ) + ( ( ds_hold / 50 ) * 121 ) + ( val_rapid * 1331 );
+
+    p5[idx] = tog_autoping | ( tog_hairtrig << 1 ) | ( tog_easysprint << 2 ) | ( tog_norumble << 3 ) | ( tog_mfix << 4 ) | ( ( val_aa_speed - 1 ) << 5 ) | ( val_ping_cd << 9 ) | ( tog_gunswap << 12 ) | ( tog_dropshot << 13 ) | ( tog_jumpshot << 14 );
+    p6[idx] = val_ds_spam | ( val_js_spam << 3 ) | ( tog_dj_combo << 6 );
+}
+
+function SaveToEEPROM() {
+    if ( active_prof == 1 ) { set_pvar( SPVAR_1, p1[0] ); set_pvar( SPVAR_2, p2[0] ); set_pvar( SPVAR_3, p3[0] ); set_pvar( SPVAR_4, p4[0] ); set_pvar( SPVAR_35, p5[0] ); set_pvar( SPVAR_43, p6[0] ); }
+    else if ( active_prof == 2 ) { set_pvar( SPVAR_5, p1[1] ); set_pvar( SPVAR_6, p2[1] ); set_pvar( SPVAR_7, p3[1] ); set_pvar( SPVAR_8, p4[1] ); set_pvar( SPVAR_36, p5[1] ); set_pvar( SPVAR_44, p6[1] ); }
+    else if ( active_prof == 3 ) { set_pvar( SPVAR_9, p1[2] ); set_pvar( SPVAR_10, p2[2] ); set_pvar( SPVAR_11, p3[2] ); set_pvar( SPVAR_12, p4[2] ); set_pvar( SPVAR_37, p5[2] ); set_pvar( SPVAR_45, p6[2] ); }
+    else if ( active_prof == 4 ) { set_pvar( SPVAR_13, p1[3] ); set_pvar( SPVAR_14, p2[3] ); set_pvar( SPVAR_15, p3[3] ); set_pvar( SPVAR_16, p4[3] ); set_pvar( SPVAR_38, p5[3] ); set_pvar( SPVAR_46, p6[3] ); }
+    else if ( active_prof == 5 ) { set_pvar( SPVAR_17, p1[4] ); set_pvar( SPVAR_18, p2[4] ); set_pvar( SPVAR_19, p3[4] ); set_pvar( SPVAR_20, p4[4] ); set_pvar( SPVAR_39, p5[4] ); set_pvar( SPVAR_47, p6[4] ); }
+    else if ( active_prof == 6 ) { set_pvar( SPVAR_21, p1[5] ); set_pvar( SPVAR_22, p2[5] ); set_pvar( SPVAR_23, p3[5] ); set_pvar( SPVAR_24, p4[5] ); set_pvar( SPVAR_40, p5[5] ); set_pvar( SPVAR_48, p6[5] ); }
+    else if ( active_prof == 7 ) { set_pvar( SPVAR_25, p1[6] ); set_pvar( SPVAR_26, p2[6] ); set_pvar( SPVAR_27, p3[6] ); set_pvar( SPVAR_28, p4[6] ); set_pvar( SPVAR_41, p5[6] ); set_pvar( SPVAR_49, p6[6] ); }
+    else if ( active_prof == 8 ) { set_pvar( SPVAR_29, p1[7] ); set_pvar( SPVAR_30, p2[7] ); set_pvar( SPVAR_31, p3[7] ); set_pvar( SPVAR_32, p4[7] ); set_pvar( SPVAR_42, p5[7] ); set_pvar( SPVAR_50, p6[7] ); }
+}
+
+function SaveProfile() { SaveToRAM(); SaveToEEPROM(); }
+
+function SaveSystem() { pack_sys = profile_mode | ( m2_prof << 2 ) | ( m5_prof << 4 ) | ( tog_ps5 << 7 ) | ( tog_flipped << 8 ); set_pvar( SPVAR_33, pack_sys ); }
+
+function SyncM2Toggles() {
+    if (profile_mode == 1) {
+        if (active_prof == 1) other_idx = 1; else if (active_prof == 2) other_idx = 0;
+
+        if (active_prof == 1 || active_prof == 2) {
+            o_rec = p1[other_idx] & 1; o_smt = (p1[other_idx] >> 1) & 1; o_aim = (p1[other_idx] >> 2) & 1; o_jmp = (p1[other_idx] >> 3) & 1;
+            o_rap = (p1[other_idx] >> 4) & 1; o_fir = (p1[other_idx] >> 5) & 1; o_af  = (p1[other_idx] >> 8) & 1; o_rf  = (p1[other_idx] >> 9) & 1;
+            o_sf  = (p1[other_idx] >> 10) & 1; o_led = (p1[other_idx] >> 11) & 7;
+
+            p1[other_idx] = o_rec | (o_smt << 1) | (o_aim << 2) | (o_jmp << 3) | (o_rap << 4) | (o_fir << 5) | (tog_ssh << 6) | (tog_dontshoot << 7) | (o_af << 8) | (o_rf << 9) | (o_sf << 10) | (o_led << 11);
+            p5[other_idx] = tog_autoping | (tog_hairtrig << 1) | (tog_easysprint << 2) | (tog_norumble << 3) | (tog_mfix << 4) | ( (val_aa_speed - 1) << 5 ) | ( val_ping_cd << 9 ) | ( tog_gunswap << 12 ) | ( tog_dropshot << 13 ) | ( tog_jumpshot << 14 );
+            p6[other_idx] = val_ds_spam | ( val_js_spam << 3 ) | ( tog_dj_combo << 6 );
+
+            if (other_idx == 0) { set_pvar(SPVAR_1, p1[0]); set_pvar(SPVAR_35, p5[0]); set_pvar(SPVAR_43, p6[0]); }
+            if (other_idx == 1) { set_pvar(SPVAR_5, p1[1]); set_pvar(SPVAR_36, p5[1]); set_pvar(SPVAR_44, p6[1]); }
+        }
+    }
+}
+`;
+
+// Buchstaben-, Ziffern- und Icon-Zeichenfunktionen – immer komplett enthalten
+const GPC_DRAW_FUNCS = `function draw_X() { line_oled( sx, sy, sx + 4, sy + 8, 1, 1 ); line_oled( sx + 4, sy, sx, sy + 8, 1, 1 ); }
+function draw_Y() { line_oled( sx, sy, sx + 2, sy + 4, 1, 1 ); line_oled( sx + 4, sy, sx + 2, sy + 4, 1, 1 ); line_oled( sx + 2, sy + 4, sx + 2, sy + 8, 1, 1 ); }
+function draw_A() { rect_oled( sx, sy + 2, 1, 7, 1, 1 ); rect_oled( sx + 4, sy + 2, 1, 7, 1, 1 ); rect_oled( sx + 1, sy, 3, 2, 1, 1 ); rect_oled( sx, sy + 4, 5, 1, 1, 1 ); }
+function draw_B() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 4, 1, 1, 1 ); rect_oled( sx, sy + 4, 4, 1, 1, 1 ); rect_oled( sx, sy + 8, 4, 1, 1, 1 ); rect_oled( sx + 4, sy + 1, 1, 3, 1, 1 ); rect_oled( sx + 4, sy + 5, 1, 3, 1, 1 ); }
+function draw_C() { rect_oled( sx, sy + 1, 1, 7, 1, 1 ); rect_oled( sx + 1, sy, 3, 1, 1, 1 ); rect_oled( sx + 1, sy + 8, 3, 1, 1, 1 ); pixel_oled( sx + 4, sy + 1, 1 ); pixel_oled( sx + 4, sy + 7, 1 ); }
+function draw_D() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 3, 1, 1, 1 ); rect_oled( sx, sy + 8, 3, 1, 1, 1 ); rect_oled( sx + 4, sy + 1, 1, 7, 1, 1 ); }
+function draw_E() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 5, 1, 1, 1 ); rect_oled( sx, sy + 4, 4, 1, 1, 1 ); rect_oled( sx, sy + 8, 5, 1, 1, 1 ); }
+function draw_F() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 5, 1, 1, 1 ); rect_oled( sx, sy + 4, 4, 1, 1, 1 ); }
+function draw_G() { rect_oled( sx, sy + 1, 1, 7, 1, 1 ); rect_oled( sx + 1, sy, 3, 1, 1, 1 ); rect_oled( sx + 1, sy + 8, 3, 1, 1, 1 ); rect_oled( sx + 4, sy + 4, 1, 4, 1, 1 ); pixel_oled( sx + 3, sy + 4, 1 ); }
+function draw_H() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx + 4, sy, 1, 9, 1, 1 ); rect_oled( sx, sy + 4, 5, 1, 1, 1 ); }
+function draw_I() { rect_oled( sx + 2, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 5, 1, 1, 1 ); rect_oled( sx, sy + 8, 5, 1, 1, 1 ); }
+function draw_J() { rect_oled( sx + 3, sy, 1, 9, 1, 1 ); rect_oled( sx, sy + 8, 3, 1, 1, 1 ); pixel_oled( sx, sy + 7, 1 ); }
+function draw_K() { rect_oled( sx, sy, 1, 9, 1, 1 ); line_oled( sx + 4, sy, sx, sy + 4, 1, 1 ); line_oled( sx + 1, sy + 4, sx + 4, sy + 8, 1, 1 ); }
+function draw_L() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy + 8, 5, 1, 1, 1 ); }
+function draw_M() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx + 4, sy, 1, 9, 1, 1 ); pixel_oled( sx + 1, sy + 2, 1 ); pixel_oled( sx + 2, sy + 3, 1 ); pixel_oled( sx + 3, sy + 2, 1 ); }
+function draw_N() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx + 4, sy, 1, 9, 1, 1 ); pixel_oled( sx + 1, sy + 2, 1 ); pixel_oled( sx + 2, sy + 3, 1 ); pixel_oled( sx + 3, sy + 4, 1 ); }
+function draw_O() { rect_oled( sx, sy, 1, 7, 1, 1 ); rect_oled( sx + 4, sy + 1, 1, 7, 1, 1 ); rect_oled( sx + 1, sy, 3, 1, 1, 1 ); rect_oled( sx + 1, sy + 8, 3, 1, 1, 1 ); }
+function draw_P() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 4, 1, 1, 1 ); rect_oled( sx, sy + 4, 4, 1, 1, 1 ); rect_oled( sx + 4, sy + 1, 1, 3, 1, 1 ); }
+function draw_R() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 4, 1, 1, 1 ); rect_oled( sx, sy + 4, 4, 1, 1, 1 ); rect_oled( sx + 4, sy + 1, 1, 3, 1, 1 ); line_oled( sx + 2, sy + 5, sx + 4, sy + 8, 1, 1 ); }
+function draw_S() { rect_oled( sx + 1, sy, 4, 1, 1, 1 ); rect_oled( sx, sy + 1, 1, 3, 1, 1 ); rect_oled( sx + 1, sy + 4, 3, 1, 1, 1 ); rect_oled( sx + 4, sy + 5, 1, 3, 1, 1 ); rect_oled( sx, sy + 8, 4, 1, 1, 1 ); }
+function draw_T() { rect_oled( sx + 2, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 5, 1, 1, 1 ); }
+function draw_U() { rect_oled( sx, sy, 1, 8, 1, 1 ); rect_oled( sx + 4, sy, 1, 8, 1, 1 ); rect_oled( sx + 1, sy + 8, 3, 1, 1, 1 ); }
+function draw_W() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx + 4, sy, 1, 9, 1, 1 ); pixel_oled( sx + 1, sy + 6, 1 ); pixel_oled( sx + 2, sy + 5, 1 ); pixel_oled( sx + 3, sy + 6, 1 ); }
+function draw_HYP() { rect_oled( sx, sy + 4, 3, 1, 1, 1 ); }
+function draw_SLASH() { line_oled( sx, sy + 8, sx + 4, sy, 1, 1 ); }
+function draw_PLUS_BIG() { rect_oled( sx + 2, sy, 2, 9, 1, 1 ); rect_oled( sx, sy + 3, 6, 2, 1, 1 ); }
+
+function draw_btn_X() { line_oled( sx, sy, sx + 6, sy + 8, 1, 1 ); line_oled( sx + 6, sy, sx, sy + 8, 1, 1 ); }
+function draw_btn_Y() { line_oled( sx, sy, sx + 3, sy + 4, 1, 1 ); line_oled( sx + 6, sy, sx + 3, sy + 4, 1, 1 ); line_oled( sx + 3, sy + 4, sx + 3, sy + 8, 1, 1 ); }
+function draw_btn_A() { rect_oled( sx, sy + 2, 1, 7, 1, 1 ); rect_oled( sx + 6, sy + 2, 1, 7, 1, 1 ); rect_oled( sx + 1, sy, 5, 2, 1, 1 ); rect_oled( sx, sy + 4, 7, 1, 1, 1 ); }
+function draw_btn_B() { rect_oled( sx, sy, 1, 9, 1, 1 ); rect_oled( sx, sy, 6, 1, 1, 1 ); rect_oled( sx, sy + 4, 6, 1, 1, 1 ); rect_oled( sx, sy + 8, 6, 1, 1, 1 ); rect_oled( sx + 6, sy + 1, 1, 3, 1, 1 ); rect_oled( sx + 6, sy + 5, 1, 3, 1, 1 ); }
+function draw_btn_CIRCLE() { line_oled( sx + 2, sy, sx + 4, sy, 1, 1 ); line_oled( sx + 2, sy + 8, sx + 4, sy + 8, 1, 1 ); line_oled( sx, sy + 2, sx, sy + 6, 1, 1 ); line_oled( sx + 6, sy + 2, sx + 6, sy + 6, 1, 1 ); pixel_oled( sx + 1, sy + 1, 1 ); pixel_oled( sx + 5, sy + 1, 1 ); pixel_oled( sx + 1, sy + 7, 1 ); pixel_oled( sx + 5, sy + 7, 1 ); }
+function draw_btn_SQUARE() { rect_oled( sx, sy, 7, 9, 0, 1 ); }
+function draw_btn_TRIANGLE() { line_oled( sx + 3, sy, sx + 6, sy + 8, 1, 1 ); line_oled( sx + 3, sy, sx, sy + 8, 1, 1 ); line_oled( sx, sy + 8, sx + 6, sy + 8, 1, 1 ); }
+
+function draw_page_digit() {
+    if ( digit_num == 1 ) { rect_oled( sx + 4, sy, 2, 14, 1, 1 ); }
+    if ( digit_num == 2 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 5, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx, sy + 8, 2, 5, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+    if ( digit_num == 3 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 10, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+    if ( digit_num == 4 ) { rect_oled( sx, sy, 2, 8, 1, 1 ); rect_oled( sx + 8, sy, 2, 14, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); }
+    if ( digit_num == 5 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx, sy + 2, 2, 5, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx + 8, sy + 8, 2, 5, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+    if ( digit_num == 6 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx, sy + 2, 2, 12, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx + 8, sy + 8, 2, 5, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+    if ( digit_num == 7 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 12, 1, 1 ); }
+    if ( digit_num == 8 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx, sy + 2, 2, 12, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 12, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+    if ( digit_num == 9 ) { rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx, sy + 2, 2, 5, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 12, 1, 1 ); rect_oled( sx, sy + 6, 10, 2, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 ); }
+}
+
+function draw_page_digit_zero() {
+    rect_oled( sx, sy, 10, 2, 1, 1 ); rect_oled( sx, sy + 2, 2, 10, 1, 1 ); rect_oled( sx + 8, sy + 2, 2, 10, 1, 1 ); rect_oled( sx, sy + 12, 10, 2, 1, 1 );
+}
+
+function draw_medium_digit() {
+    if ( digit_num == 0 ) { rect_oled( sx, sy, 5, 9, 0, 1 ); }
+    if ( digit_num == 1 ) { line_oled( sx + 2, sy, sx + 2, sy + 8, 1, 1 ); }
+    if ( digit_num == 2 ) { line_oled( sx, sy, sx + 4, sy, 1, 1 ); line_oled( sx + 4, sy, sx + 4, sy + 4, 1, 1 ); line_oled( sx + 4, sy + 4, sx, sy + 4, 1, 1 ); line_oled( sx, sy + 4, sx, sy + 8, 1, 1 ); line_oled( sx, sy + 8, sx + 4, sy + 8, 1, 1 ); }
+    if ( digit_num == 3 ) { line_oled( sx, sy, sx + 4, sy, 1, 1 ); line_oled( sx + 4, sy, sx + 4, sy + 8, 1, 1 ); line_oled( sx, sy + 4, sx + 4, sy + 4, 1, 1 ); line_oled( sx, sy + 8, sx + 4, sy + 8, 1, 1 ); }
+    if ( digit_num == 4 ) { line_oled( sx, sy, sx, sy + 4, 1, 1 ); line_oled( sx, sy + 4, sx + 4, sy + 4, 1, 1 ); line_oled( sx + 4, sy, sx + 4, sy + 8, 1, 1 ); }
+    if ( digit_num == 5 ) { line_oled( sx + 4, sy, sx, sy, 1, 1 ); line_oled( sx, sy, sx, sy + 4, 1, 1 ); line_oled( sx, sy + 4, sx + 4, sy + 4, 1, 1 ); line_oled( sx + 4, sy + 4, sx + 4, sy + 8, 1, 1 ); line_oled( sx + 4, sy + 8, sx, sy + 8, 1, 1 ); }
+    if ( digit_num == 6 ) { line_oled( sx, sy, sx, sy + 8, 1, 1 ); line_oled( sx, sy + 8, sx + 4, sy + 8, 1, 1 ); line_oled( sx + 4, sy + 8, sx + 4, sy + 4, 1, 1 ); line_oled( sx + 4, sy + 4, sx, sy + 4, 1, 1 ); }
+    if ( digit_num == 7 ) { line_oled( sx, sy, sx + 4, sy, 1, 1 ); line_oled( sx + 4, sy, sx + 4, sy + 8, 1, 1 ); }
+    if ( digit_num == 8 ) { rect_oled( sx, sy, 5, 9, 0, 1 ); line_oled( sx, sy + 4, sx + 4, sy + 4, 1, 1 ); }
+    if ( digit_num == 9 ) { rect_oled( sx, sy, 5, 5, 0, 1 ); line_oled( sx + 4, sy, sx + 4, sy + 8, 1, 1 ); }
+}
+
+function draw_big_digit() {
+    if ( digit_num == 0 ) { rect_oled( d_x, d_y, 15, 25, 0, 1 ); rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x, d_y, 3, 25, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); }
+    if ( digit_num == 1 ) rect_oled( d_x + 6, d_y, 4, 25, 1, 1 );
+    if ( digit_num == 2 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 12, 1, 1 ); rect_oled( d_x, d_y + 12, 3, 12, 1, 1 ); }
+    if ( digit_num == 3 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); }
+    if ( digit_num == 4 ) { rect_oled( d_x, d_y, 3, 12, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); }
+    if ( digit_num == 5 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x, d_y, 3, 12, 1, 1 ); rect_oled( d_x + 12, d_y + 12, 3, 12, 1, 1 ); }
+    if ( digit_num == 6 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x, d_y, 3, 25, 1, 1 ); rect_oled( d_x + 12, d_y + 12, 3, 12, 1, 1 ); }
+    if ( digit_num == 7 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); }
+    if ( digit_num == 8 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x, d_y, 3, 25, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); }
+    if ( digit_num == 9 ) { rect_oled( d_x, d_y, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 11, 15, 3, 1, 1 ); rect_oled( d_x, d_y + 22, 15, 3, 1, 1 ); rect_oled( d_x, d_y, 3, 12, 1, 1 ); rect_oled( d_x + 12, d_y, 3, 25, 1, 1 ); }
+}
+
+function DrawButtonIcon() {
+    if ( icon_btn == XB1_UP ) { line_oled( sx + 3, sy + 6, sx + 3, sy, 1, 1 ); line_oled( sx, sy + 3, sx + 3, sy, 1, 1 ); line_oled( sx + 6, sy + 3, sx + 3, sy, 1, 1 ); }
+    else if ( icon_btn == XB1_DOWN ) { line_oled( sx + 3, sy, sx + 3, sy + 6, 1, 1 ); line_oled( sx, sy + 3, sx + 3, sy + 6, 1, 1 ); line_oled( sx + 6, sy + 3, sx + 3, sy + 6, 1, 1 ); }
+    else if ( icon_btn == XB1_LEFT ) { line_oled( sx + 6, sy + 3, sx, sy + 3, 1, 1 ); line_oled( sx, sy + 3, sx + 3, sy, 1, 1 ); line_oled( sx, sy + 3, sx + 3, sy + 6, 1, 1 ); }
+    else if ( icon_btn == XB1_RIGHT ) { line_oled( sx, sy + 3, sx + 6, sy + 3, 1, 1 ); line_oled( sx + 6, sy + 3, sx + 3, sy, 1, 1 ); line_oled( sx + 6, sy + 3, sx + 3, sy + 6, 1, 1 ); }
+    else if ( icon_btn == XB1_A ) { if(tog_ps5) draw_btn_X(); else draw_btn_A(); }
+    else if ( icon_btn == XB1_B ) { if(tog_ps5) draw_btn_CIRCLE(); else draw_btn_B(); }
+    else if ( icon_btn == XB1_X ) { if(tog_ps5) draw_btn_SQUARE(); else draw_btn_X(); }
+    else if ( icon_btn == XB1_Y ) { if(tog_ps5) draw_btn_TRIANGLE(); else draw_btn_Y(); }
+    else if ( icon_btn == XB1_LB ) { draw_L(); sx = sx + 6; if(tog_ps5) { digit_num = 1; draw_medium_digit(); } else draw_btn_B(); }
+    else if ( icon_btn == XB1_RB ) { draw_R(); sx = sx + 6; if(tog_ps5) { digit_num = 1; draw_medium_digit(); } else draw_btn_B(); }
+    else if ( icon_btn == XB1_LS ) { draw_L(); sx = sx + 6; digit_num = 3; draw_medium_digit(); }
+    else if ( icon_btn == XB1_RS ) { draw_R(); sx = sx + 6; digit_num = 3; draw_medium_digit(); }
+    else if ( icon_btn == XB1_VIEW ) { rect_oled( sx, sy + 2, 6, 4, 0, 1 ); }
+    else if ( icon_btn == XB1_MENU ) { line_oled( sx, sy + 2, sx + 6, sy + 2, 1, 1 ); line_oled( sx, sy + 4, sx + 6, sy + 4, 1, 1 ); line_oled( sx, sy + 6, sx + 6, sy + 6, 1, 1 ); }
+}
+`;
+
+const GPC_COMBO_NOTIFY_SYS = `combo c_NotifyMode { set_rumble( RUMBLE_A, 100 ); wait( 150 ); set_rumble( RUMBLE_A, 0 ); wait( 150 ); }
+combo c_NotifyProfile { set_rumble( RUMBLE_B, 100 ); wait( 150 ); set_rumble( RUMBLE_B, 0 ); wait( 150 ); }
+`;
+
+const GPC_COMBO_BOOT = `combo DrawTerminalBoot {
+    cls_oled( 0 );
+    rect_oled( 0, 0, SCREEN_W, SCREEN_H, 0, 1 );
+    if ( boot_timer < 400 ) { if ( ( boot_timer % 200 ) < 100 ) rect_oled( 20, 45, 15, 4, 1, 1 ); }
+    if ( boot_timer > 400 ) { rect_oled( 20, 20, 4, 15, 1, 1 ); rect_oled( 28, 20, 4, 15, 1, 1 ); rect_oled( 22, 32, 8, 4, 1, 1 ); }
+    if ( boot_timer > 600 ) { digit_num = V_DIGIT_1; d_x = 45; d_y = 20; draw_big_digit(); }
+    if ( boot_timer > 800 ) { digit_num = V_DIGIT_2; d_x = 65; d_y = 20; draw_big_digit(); }
+    if ( boot_timer > 1000 ) rect_oled( 82, 40, 4, 4, 1, 1 );
+    if ( boot_timer > 1200 ) { digit_num = V_DIGIT_3; d_x = 90; d_y = 20; draw_big_digit(); }
+    if ( boot_timer > 1600 && boot_timer < 1800 ) rect_oled( 0, 0, SCREEN_W, SCREEN_H, 1, 1 );
+    wait( 100 );
+}
+`;
+
+const GPC_COMBO_GAMEPLAY_STATUS = `combo DrawGameplayStatus {
+    cls_oled( 0 );
+    d_x = ( saver_timer / 1000 ) % 7; d_y = ( saver_timer / 1500 ) % 5;
+    if ( m2_prof == 1 ) {
+        sx = 20 + d_x; sy = 25 + d_y;
+        draw_P(); sx = sx + 7; draw_R(); sx = sx + 7; draw_I(); sx = sx + 7; draw_M(); sx = sx + 7; draw_A(); sx = sx + 7; draw_R(); sx = sx + 7; draw_Y();
+    } else {
+        sx = 10 + d_x; sy = 25 + d_y;
+        draw_S(); sx = sx + 7; draw_E(); sx = sx + 7; draw_C(); sx = sx + 7; draw_O(); sx = sx + 7; draw_N(); sx = sx + 7; draw_D(); sx = sx + 7; draw_A(); sx = sx + 7; draw_R(); sx = sx + 7; draw_Y();
+    }
+
+    if ( pickaxe_state ) {
+        sx = 75 + d_x; sy = 25 + d_y;
+        draw_A(); sx = sx + 7; draw_X(); sx = sx + 7; draw_E();
+    } else if ( no_gun_state ) {
+        sx = 78 + d_x; sy = 25 + d_y;
+        draw_N(); sx = sx + 7; draw_O(); sx = sx + 8;
+        draw_G(); sx = sx + 7; draw_U(); sx = sx + 7; draw_N();
+    }
+    wait( 100 );
+}
+`;
+
+// DrawNotify – wird nur aufgenommen, wenn ein Erzeuger (Drop/Jump, Snap Hook,
+// Gun Swap, Dont Shoot) im Script ist. Inhalt bleibt komplett (harmlos).
+const GPC_COMBO_DRAW_NOTIFY = `combo DrawNotify {
+    cls_oled( 0 );
+    rect_oled( 0, 0, SCREEN_W, SCREEN_H, 0, 1 );
+    // Obere Zeile: was wurde ausgeloest
+    sy = 18;
+    if ( notify_msg == 1 || notify_msg == 2 ) {
+        // DROP SHOT
+        sx = 20; draw_D(); sx = sx + 7; draw_R(); sx = sx + 7; draw_O(); sx = sx + 7; draw_P(); sx = sx + 9;
+        draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T();
+    }
+    if ( notify_msg == 3 || notify_msg == 4 ) {
+        // JUMP SHOT
+        sx = 20; draw_J(); sx = sx + 7; draw_U(); sx = sx + 7; draw_M(); sx = sx + 7; draw_P(); sx = sx + 9;
+        draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T();
+    }
+    if ( notify_msg == 5 ) {
+        // SNAP HOOK
+        sx = 20; draw_S(); sx = sx + 7; draw_N(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); sx = sx + 9;
+        draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_O(); sx = sx + 7; draw_K();
+    }
+    if ( notify_msg == 6 ) {
+        // GUN SWAP
+        sx = 22; draw_G(); sx = sx + 7; draw_U(); sx = sx + 7; draw_N(); sx = sx + 9;
+        draw_S(); sx = sx + 7; draw_W(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P();
+    }
+    if ( notify_msg == 7 ) {
+        // DONT SHOOT
+        sx = 14; draw_D(); sx = sx + 7; draw_O(); sx = sx + 7; draw_N(); sx = sx + 7; draw_T(); sx = sx + 9;
+        draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T();
+    }
+    // Untere Zeile: Status (ON / OFF) bei Toggle-Meldungen, sonst "DONE"
+    sy = 38;
+    if ( notify_msg == 1 || notify_msg == 3 ) {
+        sx = 52; draw_O(); sx = sx + 7; draw_N();
+    } else if ( notify_msg == 2 || notify_msg == 4 ) {
+        sx = 48; draw_O(); sx = sx + 7; draw_F(); sx = sx + 7; draw_F();
+    } else {
+        sx = 46; draw_D(); sx = sx + 7; draw_O(); sx = sx + 7; draw_N(); sx = sx + 7; draw_E();
+    }
+    wait( 100 );
+}
+`;
+
+// ============================================================================
+// GPC-MODULES: Metadaten + parametrisierte Code-Fragmente pro Seite/Feature
+// ============================================================================
+
+// Kanonische Seiten-Reihenfolge (wie im Original RAW 40.0)
+const MODULES = [
+  { id: 'recoil',    name: 'STD RECOIL',   tag: 'Vertikale Rückstoßkontrolle',
+    doc: n => ` * PAGE ${n} (STD RECOIL): Standard vertical recoil compensation.\n * > Range: -10.0 to +10.0 (in 0.5 steps). Negative values (-) pull the weapon UP.\n * > Press B/Circle to toggle if it requires ADS + FIRE to activate (checkbox).` },
+  { id: 'smart',     name: 'SMART RECOIL', tag: 'Dynamische X/Y-Rückstoßkontrolle',
+    doc: n => ` * PAGE ${n} (SMART RECOIL): Dynamic X/Y Axis recoil control.\n * > The Y-Axis (Vertical) is shared with STD RECOIL.\n * > Only adjust the X-Axis here if your weapon drifts to the left or right.` },
+  { id: 'aim',       name: 'AIM ASSIST',   tag: 'Adaptive Aim-Assist-Rotation',
+    doc: n => ` * PAGE ${n} (AIM ASSIST): Adaptive Circular Rotational Aim Assist.\n * > Sticky slowdown on fine tracking gives a "magnetic" feel.\n * > Press X/Square to cycle rotation speed (SPD 1=slowest, 10=fastest).` },
+  { id: 'roll',      name: 'EASY ROLL',    tag: 'Endlos-Rollen bei gehaltener Taste',
+    doc: n => ` * PAGE ${n} (EASY ROLL): Endless dodge rolls.\n * > Just HOLD the slide/crouch button in-game to auto-roll continuously.` },
+  { id: 'light',     name: 'RAPID LIGHT',  tag: 'Taschenlampen-Strobo',
+    doc: n => ` * PAGE ${n} (RAPID LIGHT): Fun strobe feature.\n * > Rapidly spams the D-Pad Right button to flash your in-game flashlight!` },
+  { id: 'rapidfire', name: 'RAPID FIRE',   tag: 'Max. Feuerrate für Semi-Automatik',
+    doc: n => ` * PAGE ${n} (RAPID FIRE): Maximizes fire rate for semi-auto weapons (Pistols/DMRs).\n * > Press B/Circle to cycle the controller LED colors while shooting.` },
+  { id: 'snaphook',  name: 'SNAP HOOK',    tag: '1-Klick Grapple-Hook-Makro',
+    doc: (n, ctx) => ` * PAGE ${n} (SNAP HOOK${ctx.hasFeat('gunswap') ? ' / GUN SWAP' : ''}): 1-Click grapple hook${ctx.hasFeat('gunswap') ? ' or weapon-stow macro' : ''}.\n${ctx.hasFeat('gunswap') ? ' * > When GUN-SWAP is ON (FEATURES page), this page becomes GUN SWAP mode.\n' : ''} * > Press X/Square to switch between PS5 and XBOX visual menu icons.\n * > Press B/Circle to ENTER REMAP MODE, then press any button to map it!` },
+  { id: 'dontshoot', name: 'DONT SHOOT',   tag: 'Auto-Comm-Wheel-Geste',
+    doc: n => ` * PAGE ${n} (DONT SHOOT): Auto-Comm Wheel gesture.\n * > Press B/Circle to ENTER REMAP MODE, then press any button to map it!\n * > Press RS/R3 to adjust the internal macro delays (Hold/Wait timings).` },
+  { id: 'features',  name: 'FEATURES',     tag: 'Untermenü mit Extra-Mods',
+    doc: (n, ctx) => {
+      const docs = {
+        autoping: 'AUTO-PING: Auto-pings enemies (RB/R1) while aiming and firing.\n * >    When ON, a PING-CD sub-option appears (OFF, 1-5 sec cooldown).',
+        hairtrig: 'HAIR-TRIG: Digital triggers. 5% pressure equals 100% in-game input.',
+        autorun:  'AUTO-RUN: Flawless 360-degree sprint. Automatically taps L3 at 95% stick.',
+        flipped:  'FLIPPED: Globally swaps LT/RT with LB/RB for the entire script & menu!',
+        norumble: 'NO RUMBLE: Blocks annoying in-game rumbles, keeps script rumbles active.',
+        mfix:     'M-FIX: Locks the current M-Mode. Prevents accidental M1/M2/M5 switching.',
+        gunswap:  'GUN-SWAP: Turns the SNAP HOOK page into Gun Swap (stows weapon to safe pocket).'
+      };
+      const lines = ctx.feats.map((f, k) => ` * > ${k + 1}. ${docs[f]}`).join('\n');
+      return ` * PAGE ${n} (FEATURES): Sub-Menu for extra mods. D-Pad Up/Down to select.\n${lines}`;
+    } },
+  { id: 'dropjump',  name: 'DROP/JUMP',    tag: 'Drop-Shot / Jump-Shot bei R2',
+    doc: n => ` * PAGE ${n} (DROP/JUMP): Movement tech on R2 press. D-Pad Up/Down to select.\n * > DROP-SHOT: When ON, pressing R2 also holds Circle/B (go prone).\n * > JUMP-SHOT: When ON, pressing R2 also taps X (jump).\n * > COMBO-TOG: When ON, toggle in-game without the menu:\n * >   L2 + D-Pad Down = Drop Shot ON/OFF, L2 + D-Pad Up = Jump Shot ON/OFF.` },
+];
+
+// Kanonische Feature-Reihenfolge auf der FEATURES-Seite
+const FEATS = [
+  { id: 'autoping', name: 'AUTO-PING', tag: 'Pingt Gegner automatisch beim Zielen + Feuern (RB/R1)' },
+  { id: 'hairtrig', name: 'HAIR-TRIG', tag: 'Digitale Trigger: 5% Druck = 100% Eingabe' },
+  { id: 'autorun',  name: 'AUTO-RUN',  tag: 'Automatischer Sprint bei 95% Stick-Ausschlag' },
+  { id: 'flipped',  name: 'FLIPPED',   tag: 'Tauscht LT/RT mit LB/RB global' },
+  { id: 'norumble', name: 'NO RUMBLE', tag: 'Blockt Spiel-Vibration, Script-Vibration bleibt' },
+  { id: 'mfix',     name: 'M-FIX',     tag: 'Sperrt den M-Modus gegen versehentliches Umschalten' },
+  { id: 'gunswap',  name: 'GUN-SWAP',  tag: 'Macht aus SNAP HOOK die Gun-Swap-Waffentasche (braucht die SNAP-HOOK-Seite)' },
+];
+
+// Tasten für die Trigger-Dropdowns (Remap-fähige Tasten wie im Original)
+const TRIGGER_BTNS = [
+  ['XB1_UP',    'D-Pad Hoch'],
+  ['XB1_DOWN',  'D-Pad Runter'],
+  ['XB1_LEFT',  'D-Pad Links'],
+  ['XB1_RIGHT', 'D-Pad Rechts'],
+  ['XB1_A',     'A / Kreuz'],
+  ['XB1_B',     'B / Kreis'],
+  ['XB1_X',     'X / Viereck'],
+  ['XB1_Y',     'Y / Dreieck'],
+  ['XB1_LB',    'LB / L1'],
+  ['XB1_RB',    'RB / R1'],
+  ['XB1_LS',    'LS / L3'],
+  ['XB1_RS',    'RS / R3'],
+  ['XB1_VIEW',  'View / Touchpad'],
+  ['XB1_MENU',  'Menü / Options'],
+];
+
+// ---------------------------------------------------------------------------
+// Fragment-Bausteine. ctx = { I, has, hasFeat, feats, cfg, N }
+//   I[id]      → neuer page_index des Moduls
+//   has(id)    → Seite enthalten?
+//   hasFeat(id)→ Feature auf der FEATURES-Seite enthalten?
+//   feats      → Liste der gewählten Feature-IDs (kanonische Reihenfolge)
+//   N          → Anzahl Seiten
+// ---------------------------------------------------------------------------
+const FRAG = {};
+
+// ---- Menü-Bedienung: Eingaben nullen (edit mode) ----
+FRAG.editZero = ctx => {
+  let s = '';
+  if (ctx.has('smart')) s += `            if ( page_index == ${ctx.I.smart} ) {\n                set_val( XB1_RX, 0 ); set_val( XB1_RY, 0 ); set_val( RESET_BTN, 0 );\n            }\n\n`;
+  if (ctx.has('aim')) s += `            if ( page_index == ${ctx.I.aim} ) { set_val( XB1_X, 0 ); }\n`;
+  if (ctx.has('snaphook')) s += `            if ( page_index == ${ctx.I.snaphook} ) { set_val( XB1_X, 0 ); }\n`;
+  if (ctx.has('dontshoot')) s += `            if ( page_index == ${ctx.I.dontshoot} ) { set_val( XB1_X, 0 ); set_val( XB1_B, 0 ); set_val( RESET_BTN, 0 ); }\n`;
+  return s;
+};
+
+// ---- feat_max-Berechnung für die FEATURES-Seite ----
+FRAG.featMaxCode = ctx => {
+  const n = ctx.feats.length;
+  if (ctx.hasFeat('autoping')) {
+    return `if ( tog_autoping ) feat_max = ${n}; else feat_max = ${n - 1};`;
+  }
+  return `feat_max = ${n - 1};`;
+};
+
+// ---- Up/Down-Navigation der Untermenüs + generisches Wert-Ändern ----
+FRAG.editSubNav = ctx => {
+  const blocks = [];
+  if (ctx.has('features')) {
+    blocks.push(`if ( page_index == ${ctx.I.features} ) {
+                ${FRAG.featMaxCode(ctx)}
+                if ( event_press( XB1_UP ) ) { feature_idx = feature_idx - 1; if ( feature_idx < 0 ) feature_idx = feat_max; }
+                if ( event_press( XB1_DOWN ) ) { feature_idx = feature_idx + 1; if ( feature_idx > feat_max ) feature_idx = 0; }
+            }`);
+  }
+  if (ctx.has('dropjump')) {
+    blocks.push(`if ( page_index == ${ctx.I.dropjump} ) {
+                if ( tog_dropshot || tog_jumpshot ) dj_feat_max = 3; else dj_feat_max = 2;
+                if ( event_press( XB1_UP ) ) { dj_idx = dj_idx - 1; if ( dj_idx < 0 ) dj_idx = dj_feat_max; }
+                if ( event_press( XB1_DOWN ) ) { dj_idx = dj_idx + 1; if ( dj_idx > dj_feat_max ) dj_idx = 0; }
+            }`);
+  }
+  // generisches Hoch/Runter für Wert-Seiten
+  const condParts = [];
+  if (ctx.has('snaphook')) condParts.push(`page_index != ${ctx.I.snaphook}`);
+  if (ctx.has('dontshoot')) condParts.push(`page_index != ${ctx.I.dontshoot}`);
+  condParts.push('!fsh_edit_mode', '!ds_btn_edit_mode');
+  const sm = ctx.has('smart');
+  const up = sm
+    ? `if ( page_index == ${ctx.I.smart} ) math_temp = -1; else math_temp = 1;\n                    ModifyValue();\n                    if ( page_index == ${ctx.I.smart} ) text_timer = 0;`
+    : `math_temp = 1;\n                    ModifyValue();`;
+  const down = sm
+    ? `if ( page_index == ${ctx.I.smart} ) math_temp = 1; else math_temp = -1;\n                    ModifyValue();\n                    if ( page_index == ${ctx.I.smart} ) text_timer = 0;`
+    : `math_temp = -1;\n                    ModifyValue();`;
+  blocks.push(`if ( ${condParts.join(' && ')} ) {
+                if ( event_press( XB1_UP ) ) {
+                    ${up}
+                }
+                if ( event_press( XB1_DOWN ) ) {
+                    ${down}
+                }
+            }`);
+  return '            ' + blocks.join('\n            else ') + '\n';
+};
+
+// ---- Seitenspezifische Menü-Handler ----
+FRAG.editHandlers = ctx => {
+  let s = '';
+  if (ctx.has('smart')) s += `
+            if ( page_index == ${ctx.I.smart} ) {
+                nav_timer = nav_timer + get_rtime();
+                if ( event_press( RESET_BTN ) ) {
+                    smart_x = 0; val_recoil = 0;
+                    text_timer = 0; SaveProfile();
+                }
+
+                if ( abs( get_ival( XB1_RX ) ) > 25 ) {
+                    if ( nav_timer > 150 ) {
+                        text_timer = 0;
+                        if ( get_ival( XB1_RX ) > 0 ) smart_x = smart_x + 1; else smart_x = smart_x - 1;
+                        if ( smart_x > 20 ) smart_x = 20; if ( smart_x < -20 ) smart_x = -20;
+                        nav_timer = 0; SaveProfile();
+                    }
+                }
+                if ( abs( get_ival( XB1_RY ) ) > 25 ) {
+                    if ( nav_timer > 150 ) {
+                        text_timer = 0;
+                        if ( get_ival( XB1_RY ) > 0 ) val_recoil = val_recoil + 1; else val_recoil = val_recoil - 1;
+                        if ( val_recoil > 20 ) val_recoil = 20; if ( val_recoil < -20 ) val_recoil = -20;
+                        nav_timer = 0; SaveProfile();
+                    }
+                }
+                if ( abs( get_ival( XB1_RX ) ) < 25 && abs( get_ival( XB1_RY ) ) < 25 ) nav_timer = 151;
+            }
+`;
+  if (ctx.has('snaphook')) s += `
+            if ( page_index == ${ctx.I.snaphook} ) {
+                if ( event_press( XB1_X ) ) {
+                    if ( tog_ps5 ) tog_ps5 = 0; else tog_ps5 = 1; SaveSystem();
+                }
+                if ( event_press( SLIDE_BTN ) ) {
+                    if ( fsh_edit_mode ) { ssh_trigger = XB1_B; fsh_edit_mode = 0; SaveProfile(); }
+                    else { fsh_edit_mode = 1; }
+                }
+                if ( fsh_edit_mode ) {
+                    set_val( XB1_X, 0 ); set_val( XB1_Y, 0 ); set_val( XB1_LB, 0 ); set_val( XB1_RB, 0 );
+                    set_val( XB1_LS, 0 ); set_val( XB1_RS, 0 ); set_val( XB1_VIEW, 0 ); set_val( XB1_MENU, 0 ); set_val( XB1_B, 0 );
+                    if ( event_press( XB1_UP ) ) { ssh_trigger = XB1_UP; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_DOWN ) ) { ssh_trigger = XB1_DOWN; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LEFT ) ) { ssh_trigger = XB1_LEFT; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RIGHT ) ) { ssh_trigger = XB1_RIGHT; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_A ) ) { ssh_trigger = XB1_A; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_X ) ) { ssh_trigger = XB1_X; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_Y ) ) { ssh_trigger = XB1_Y; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LB ) ) { ssh_trigger = XB1_LB; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RB ) ) { ssh_trigger = XB1_RB; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LS ) ) { ssh_trigger = XB1_LS; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RS ) ) { ssh_trigger = XB1_RS; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_VIEW ) ) { ssh_trigger = XB1_VIEW; fsh_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_MENU ) ) { ssh_trigger = XB1_MENU; fsh_edit_mode = 0; SaveProfile(); }
+                }
+            }
+`;
+  if (ctx.has('dontshoot')) s += `
+            if ( page_index == ${ctx.I.dontshoot} ) {
+                if ( event_press( RESET_BTN ) ) {
+                    if ( ds_time_edit_mode ) ds_time_edit_mode = 0; else ds_time_edit_mode = 1;
+                    ds_btn_edit_mode = 0;
+                }
+
+                if ( ds_btn_edit_mode ) {
+                    set_val( XB1_X, 0 ); set_val( XB1_Y, 0 ); set_val( XB1_B, 0 ); set_val( XB1_LB, 0 ); set_val( XB1_RB, 0 ); set_val( XB1_LS, 0 );
+                    set_val( XB1_RS, 0 ); set_val( XB1_VIEW, 0 ); set_val( XB1_MENU, 0 );
+                    if ( event_press( XB1_UP ) ) { ds_trigger = XB1_UP; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_DOWN ) ) { ds_trigger = XB1_DOWN; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LEFT ) ) { ds_trigger = XB1_LEFT; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RIGHT ) ) { ds_trigger = XB1_RIGHT; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_A ) ) { ds_trigger = XB1_A; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_X ) ) { ds_trigger = XB1_X; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_Y ) ) { ds_trigger = XB1_Y; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_B ) ) { ds_trigger = XB1_B; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LB ) ) { ds_trigger = XB1_LB; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RB ) ) { ds_trigger = XB1_RB; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_LS ) ) { ds_trigger = XB1_LS; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_RS ) ) { ds_trigger = XB1_RS; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_VIEW ) ) { ds_trigger = XB1_VIEW; ds_btn_edit_mode = 0; SaveProfile(); }
+                    else if ( event_press( XB1_MENU ) ) { ds_trigger = XB1_MENU; ds_btn_edit_mode = 0; SaveProfile(); }
+                } else {
+                    if ( ds_time_edit_mode ) {
+                        if ( event_press( XB1_X ) ) { ds_delay = ds_delay + 50; if ( ds_delay > 500 ) ds_delay = 50; SaveProfile(); }
+                        if ( event_press( XB1_B ) ) { ds_hold = ds_hold + 50; if ( ds_hold > 500 ) ds_hold = 50; SaveProfile(); }
+                    } else {
+                        if ( event_press( SLIDE_BTN ) ) { ds_btn_edit_mode = 1; }
+                    }
+                }
+            }
+`;
+  if (ctx.has('recoil')) s += `
+            if ( page_index == ${ctx.I.recoil} ) {
+                if ( event_press( SLIDE_BTN ) ) {
+                     if ( tog_rec_fire ) tog_rec_fire = 0; else tog_rec_fire = 1; SaveProfile();
+                }
+            }
+`;
+  if (ctx.has('smart')) s += `            if ( page_index == ${ctx.I.smart} ) {
+                if ( event_press( SLIDE_BTN ) ) {
+                    if ( tog_smart_fire ) tog_smart_fire = 0; else tog_smart_fire = 1; text_timer = 2000; SaveProfile();
+                }
+            }
+`;
+  if (ctx.has('aim')) s += `            if ( page_index == ${ctx.I.aim} ) {
+                if ( event_press( SLIDE_BTN ) ) {
+                    if ( tog_aim_fire ) tog_aim_fire = 0; else tog_aim_fire = 1; SaveProfile();
+                }
+                if ( event_press( XB1_X ) ) {
+                    val_aa_speed = val_aa_speed + 1;
+                    if ( val_aa_speed > 10 ) val_aa_speed = 1;
+                    SaveProfile();
+                }
+            }
+`;
+  if (ctx.has('rapidfire')) s += `            if ( page_index == ${ctx.I.rapidfire} ) {
+                if ( event_press( SLIDE_BTN ) ) {
+                    rf_led_mode = rf_led_mode + 1; if ( rf_led_mode > 4 ) rf_led_mode = 0; SaveProfile();
+                }
+            }
+`;
+  return s;
+};
+
+// ---- Gameplay-Blöcke ----
+FRAG.gameplay = ctx => {
+  let s = '';
+  if (ctx.hasFeat('hairtrig')) s += `            if ( tog_hairtrig ) {
+                if ( get_val( ADS_BTN ) > 5 ) set_val( ADS_BTN, 100 );
+                if ( get_val( FIRE_BTN ) > 5 ) set_val( FIRE_BTN, 100 );
+            }
+
+`;
+  if (ctx.hasFeat('autorun')) s += `            if ( tog_easysprint ) {
+                math_temp = isqrt ( ( get_ival( XB1_LX ) * get_ival( XB1_LX ) ) + ( get_ival( XB1_LY ) * get_ival( XB1_LY ) ) );
+                if ( math_temp >= 95 ) {
+                    if ( !sprint_active ) {
+                        combo_run( c_AutoSprint );
+                        sprint_active = 1;
+                    }
+                } else if ( math_temp < 90 ) {
+                    sprint_active = 0;
+                }
+            }
+
+`;
+  if (ctx.hasFeat('autoping')) s += `            if ( tog_autoping ) {
+                ping_cd_timer = ping_cd_timer + get_rtime();
+                if ( ping_cd_timer > 6000 ) ping_cd_timer = 6000;
+                if ( get_val( ADS_BTN ) && get_val( FIRE_BTN ) ) {
+                    if ( val_ping_cd == 0 ) {
+                        combo_run( c_AutoPing );
+                    } else if ( ping_cd_timer >= val_ping_cd * 1000 ) {
+                        combo_run( c_AutoPing );
+                        ping_cd_timer = 0;
+                    }
+                } else {
+                    combo_stop( c_AutoPing );
+                }
+            }
+
+`;
+  if (ctx.has('dontshoot')) s += `            if ( tog_dontshoot ) {
+                if ( get_val( ds_trigger ) ) {
+                    if ( get_ptime( ds_trigger ) >= ds_delay ) {
+                        if ( !ds_running ) {
+                            ds_running = 1;
+                            ds_timer = 0; ds_rand = 22 + noise_counter;
+                            if ( ds_rand > ds_hold ) ds_rand = ds_hold;
+                        }
+                    }
+                } else { ds_running = 0; }
+
+                if ( ds_running == 1 ) {
+                    ds_timer = ds_timer + get_rtime();
+                    if ( ds_timer <= ds_hold ) {
+                        set_val( XB1_UP, 100 );
+                        math_temp = ds_hold - ds_rand;
+                        if ( ds_timer > math_temp ) {
+                            time_in_rs = ds_timer - math_temp;
+                            ry_val = ( time_in_rs * 100 ) / ds_rand;
+                            if ( ry_val > 100 ) ry_val = 100;
+                            set_val( XB1_RY, -ry_val ); set_val( XB1_RX, 0 );
+                        }
+                    } else {
+                        // Geste komplett durchgelaufen - JETZT erst die Meldung
+                        ds_running = 2;
+                        notify_msg = 7; notify_timer = 2000;
+                    }
+                }
+            }
+
+`;
+  if (ctx.has('dropjump')) s += `            // === DROP SHOT / JUMP SHOT ===
+            // Combo-Toggle: L2 + D-Pad Down schaltet Drop Shot, L2 + D-Pad Up Jump Shot
+            if ( tog_dj_combo && get_val( ADS_BTN ) ) {
+                if ( event_press( XB1_DOWN ) ) {
+                    if ( tog_dropshot ) { tog_dropshot = 0; notify_msg = 2; }
+                    else { tog_dropshot = 1; tog_jumpshot = 0; notify_msg = 1; }
+                    notify_timer = 2000;
+                    SaveProfile();
+                    combo_run( c_NotifyMode );
+                }
+                if ( event_press( XB1_UP ) ) {
+                    if ( tog_jumpshot ) { tog_jumpshot = 0; notify_msg = 4; }
+                    else { tog_jumpshot = 1; tog_dropshot = 0; notify_msg = 3; }
+                    notify_timer = 2000;
+                    SaveProfile();
+                    combo_run( c_NotifyMode );
+                }
+            }
+
+            // Drop Shot
+            if ( tog_dropshot ) {
+                if ( get_val( FIRE_BTN ) ) {
+                    if ( val_ds_spam == 0 ) {
+                        if ( event_press( FIRE_BTN ) ) combo_run( c_DropShot );
+                    } else {
+                        ds_spam_timer = ds_spam_timer + get_rtime();
+                        if ( ds_spam_timer >= 588 - val_ds_spam * 88 ) { combo_run( c_DropShot ); ds_spam_timer = 0; }
+                    }
+                } else { ds_spam_timer = 9999; }
+            }
+            // Jump Shot
+            if ( tog_jumpshot ) {
+                if ( get_val( FIRE_BTN ) ) {
+                    if ( val_js_spam == 0 ) {
+                        if ( event_press( FIRE_BTN ) ) combo_run( c_JumpShot );
+                    } else {
+                        js_spam_timer = js_spam_timer + get_rtime();
+                        if ( js_spam_timer >= 588 - val_js_spam * 88 ) { combo_run( c_JumpShot ); js_spam_timer = 0; }
+                    }
+                } else { js_spam_timer = 9999; }
+            }
+
+`;
+  if (ctx.has('snaphook')) {
+    const gs = ctx.hasFeat('gunswap');
+    s += `            if ( tog_ssh && get_val( ADS_BTN ) && event_press( ssh_trigger ) ) {
+                fsh_timer = 0;
+                if ( tog_ps5 ) snap_btn = PS4_TOUCH; else snap_btn = XB1_VIEW;
+${gs ? `                if ( tog_gunswap ) { combo_run( c_GunSwap ); notify_msg = 6; }
+                else { combo_run( c_SafeSnapHook ); notify_msg = 5; }` : `                combo_run( c_SafeSnapHook ); notify_msg = 5;`}
+                notify_timer = 2000;
+            }
+
+            if ( ${gs ? 'combo_running( c_SafeSnapHook ) || combo_running( c_GunSwap )' : 'combo_running( c_SafeSnapHook )'} ) {
+                set_val( ADS_BTN, 0 ); set_val( ssh_trigger, 0 );
+                fsh_timer = fsh_timer + get_rtime();
+                if ( fsh_timer > 30 ) { set_val( XB1_RX, 0 ); set_val( XB1_RY, 0 ); }
+            }
+
+`;
+  }
+  const anyStick = ctx.has('aim') || ctx.has('recoil') || ctx.has('smart');
+  if (anyStick) s += `            final_rx = get_val( RX_AXIS );
+            final_ry = get_val( RY_AXIS );
+
+`;
+  if (ctx.has('aim')) s += `            aa_active = 0;
+            if ( tog_aim && val_aim > 0 ) {
+                if ( get_val( ADS_BTN ) ) {
+                    if ( tog_aim_fire ) { if ( get_val( FIRE_BTN ) ) aa_active = 1; }
+                    else { aa_active = 1; }
+                }
+            }
+
+            if ( aa_active ) {
+                aa_radius = ( val_aim * 30 ) / 10;
+
+                // Wie stark bewegt der Spieler gerade den rechten Stick?
+                aa_stick_mag = isqrt( ( final_rx * final_rx ) + ( final_ry * final_ry ) );
+
+                // --- 1. STICKY SLOWDOWN ---
+                if ( aa_stick_mag > 3 && aa_stick_mag < 55 ) {
+                    aa_damp = 100 - ( val_aim * 3 );
+                    final_rx = ( final_rx * aa_damp ) / 100;
+                    final_ry = ( final_ry * aa_damp ) / 100;
+                }
+
+                // --- 2. MIKRO-BEWEGUNG (Kreis) ---
+                if ( aa_stick_mag < 8 ) aa_micro_scale = 100;
+                else if ( aa_stick_mag < 40 ) aa_micro_scale = 40;
+                else aa_micro_scale = 0;
+
+                if ( aa_micro_scale > 0 ) {
+                    circle_acc = ( circle_acc + ( val_aa_speed * 5 ) ) % 640;
+                    circle_step = circle_acc / 10;
+
+                    aa_x = cosTableCircle[ circle_step ];
+                    aa_y = sinTableCircle[ circle_step ];
+
+                    aa_x = ( ( aa_x * aa_radius ) / 100 * aa_micro_scale ) / 100;
+                    aa_y = ( ( aa_y * aa_radius ) / 100 * aa_micro_scale ) / 100;
+
+                    final_rx = final_rx + aa_x;
+                    final_ry = final_ry + aa_y;
+                }
+            }
+
+`;
+  if (ctx.has('recoil') || ctx.has('smart')) {
+    s += `            rec_active = 0;
+            if ( get_val( FIRE_BTN ) ) {
+`;
+    if (ctx.has('recoil')) s += `                if ( tog_recoil && val_recoil != 0 ) {
+                    if ( tog_rec_fire ) { if ( get_val( ADS_BTN ) ) rec_active = 1; }
+                    else { rec_active = 1; }
+                }
+`;
+    if (ctx.has('smart')) s += `                if ( tog_smart && ( val_recoil != 0 || smart_x != 0 ) ) {
+                     if ( tog_smart_fire ) { if ( get_val( ADS_BTN ) ) rec_active = 2; }
+                     else { rec_active = 2; }
+                }
+`;
+    s += `            }
+
+            if ( rec_active > 0 ) {
+                ar_timer = ar_timer + get_rtime();
+                if ( ar_timer > 600 ) ar_timer = 600;
+
+                if ( val_recoil > 0 ) ar_max = ( val_recoil + 4 ) * 2;
+                else if ( val_recoil < 0 ) ar_max = ( val_recoil - 4 ) * 2;
+                else ar_max = 0;
+
+                if ( ar_timer > 50 ) ar_now = ar_max; else ar_now = ( ar_max * ar_timer ) / 50;
+                final_ry = final_ry + ar_now;
+`;
+    if (ctx.has('smart')) s += `
+                if ( rec_active == 2 ) {
+                    ar_max = smart_x * 2;
+                    smart_x_now = ( ar_max * ar_timer ) / 600;
+                    final_rx = final_rx + smart_x_now;
+                }
+`;
+    s += `            } else { ar_timer = 0; }
+
+`;
+  }
+  if (anyStick) {
+    const togs = [];
+    if (ctx.has('aim')) togs.push('tog_aim');
+    if (ctx.has('recoil')) togs.push('tog_recoil');
+    if (ctx.has('smart')) togs.push('tog_smart');
+    s += `            if ( ${togs.join(' || ')} ) {
+                if ( final_rx > 100 ) final_rx = 100; if ( final_rx < -100 ) final_rx = -100;
+                if ( final_ry > 100 ) final_ry = 100; if ( final_ry < -100 ) final_ry = -100;
+                set_val( RX_AXIS, final_rx ); set_val( RY_AXIS, final_ry );
+            }
+
+`;
+  }
+  if (ctx.has('roll')) s += `            if ( tog_jump && val_jump > 0 ) {
+                if ( get_val( SLIDE_BTN ) ) {
+                    db_timer = db_timer + get_rtime();
+                    if ( val_jump <= 5 ) { math_temp = val_jump * 50; jump_wait = 350 - math_temp; }
+                    else { math_temp = val_jump * 10; jump_wait = 150 - math_temp; }
+                    noise = get_rtime() % 21; math_temp = jump_wait + noise;
+
+                    if ( db_timer >= math_temp && !db_running ) { combo_run( DoubleB_Action ); db_running = 1; }
+                    if ( db_running ) set_val( SLIDE_BTN, 0 );
+                } else { db_timer = 0; db_running = 0; }
+            }
+
+`;
+  if (ctx.has('light')) s += `            if ( tog_rapid && val_rapid > 0 && get_val( RAPID_BTN ) ) {
+                if ( get_ptime( RAPID_BTN ) > 300 ) {
+                    if ( rl_timer == 0 ) {
+                        math_temp = val_rapid - 1; math_temp = math_temp * 16; math_temp = math_temp / 9;
+                         target_hz = 4 + math_temp; rl_wait = 1000 / target_hz; rl_hold = 150;
+                         math_temp = rl_wait - 20;
+                         if ( rl_hold > math_temp ) rl_hold = math_temp;
+                         if ( rl_hold < 20 ) rl_hold = 20;
+                    }
+                    rl_timer = rl_timer + get_rtime();
+                    if ( rl_timer <= rl_hold ) { set_val( RAPID_BTN, 100 ); } else { set_val( RAPID_BTN, 0 ); }
+                    if ( rl_timer >= rl_wait ) rl_timer = 0;
+                }
+            } else { rl_timer = 0; }
+
+`;
+  if (ctx.has('rapidfire')) s += `            if ( tog_fire && get_val( FIRE_BTN ) && get_val( ADS_BTN ) ) {
+                rf_shuffle = get_rtime() % 20; combo_run( c_RapidFire );
+            } else { combo_stop( c_RapidFire ); }
+`;
+  return s.replace(/\s+$/, '\n');
+};
+
+// ---- Combos der Module ----
+FRAG.combos = ctx => {
+  let s = '';
+  if (ctx.has('roll')) s += `combo DoubleB_Action { set_val( SLIDE_BTN, 0 ); wait( 40 ); set_val( SLIDE_BTN, 100 ); wait( 100 ); set_val( SLIDE_BTN, 0 ); }\n`;
+  if (ctx.hasFeat('autorun')) s += `combo c_AutoSprint { set_val( XB1_LS, 100 ); wait( 50 ); set_val( XB1_LS, 0 ); }\n`;
+  if (ctx.has('rapidfire')) s += `
+combo c_RapidFire {
+    set_val( FIRE_BTN, 100 );
+    wait( 15 + ( 80 - ( val_fire * 8 ) ) + rf_shuffle );
+    set_val( FIRE_BTN, 0 );
+    wait( 15 + ( 80 - ( val_fire * 8 ) ) + rf_shuffle );
+}
+`;
+  if (ctx.hasFeat('autoping')) s += `
+combo c_AutoPing {
+    set_val( PING_BTN, 100 );
+    wait( 50 );
+    set_val( PING_BTN, 0 );
+    wait( 200 );
+}
+`;
+  if (ctx.has('dropjump')) s += `
+combo c_DropShot {
+    // R2 bleibt komplett nativ (vom Spieler). Wir fuegen NUR Circle/B hinzu.
+    set_val( SLIDE_BTN, 100 );
+    wait( 200 );
+    set_val( SLIDE_BTN, 0 );
+}
+
+combo c_JumpShot {
+    // R2 bleibt komplett nativ. Wir tappen NUR den Sprung-Button.
+    set_val( XB1_A, 100 );
+    wait( 60 );
+    set_val( XB1_A, 0 );
+}
+`;
+  if (ctx.has('snaphook')) {
+    s += `
+combo c_SafeSnapHook {
+    set_val( snap_btn, 100 ); wait( 40 ); set_val( snap_btn, 0 ); wait( 40 );
+    set_val( XB1_RX, 100 ); wait( 40 ); set_val( XB1_RX, 0 ); wait( 40 );
+    set_val( XB1_A, 100 ); wait( 40 ); set_val( XB1_A, 0 ); wait( 40 );
+    set_val( XB1_RY, 100 ); wait( 40 ); set_val( XB1_RY, 0 ); wait( 40 );
+    set_val( XB1_RY, 100 ); wait( 40 ); set_val( XB1_RY, 0 ); wait( 40 );
+    set_val( XB1_A, 100 ); wait( 40 ); set_val( XB1_A, 0 ); wait( 40 );
+    set_val( XB1_B, 100 ); wait( 50 ); set_val( XB1_B, 0 );
+}
+`;
+    if (ctx.hasFeat('gunswap')) s += `
+combo c_GunSwap {
+    set_val( snap_btn, 100 ); wait( 40 ); set_val( snap_btn, 0 ); wait( 40 );
+    set_val( XB1_LEFT, 100 ); wait( 40 ); set_val( XB1_LEFT, 0 ); wait( 40 );
+    set_val( XB1_DOWN, 100 ); wait( 40 ); set_val( XB1_DOWN, 0 ); wait( 40 );
+    set_val( XB1_A, 100 ); wait( 40 ); set_val( XB1_A, 0 ); wait( 40 );
+    set_val( XB1_RX, 100 ); wait( 40 ); set_val( XB1_RX, 0 ); wait( 40 );
+    set_val( XB1_RX, 100 ); wait( 40 ); set_val( XB1_RX, 0 ); wait( 40 );
+    set_val( XB1_RY, 100 ); wait( 40 ); set_val( XB1_RY, 0 ); wait( 40 );
+    set_val( XB1_RY, 100 ); wait( 40 ); set_val( XB1_RY, 0 ); wait( 40 );
+    set_val( XB1_A, 100 ); wait( 40 ); set_val( XB1_A, 0 ); wait( 40 );
+    set_val( XB1_B, 100 ); wait( 50 ); set_val( XB1_B, 0 );
+}
+`;
+  }
+  return s;
+};
+
+// ---- FEATURES-Seite: Ketten für GetCurrentToggle / ToggleCurrentMod / Draw ----
+const FEAT_GET = {
+  autoping: 'return tog_autoping;',
+  pingcd:   '{ if ( val_ping_cd > 0 ) return 1; else return 0; }',
+  hairtrig: 'return tog_hairtrig;',
+  autorun:  'return tog_easysprint;',
+  flipped:  'return tog_flipped;',
+  norumble: 'return tog_norumble;',
+  mfix:     'return tog_mfix;',
+  gunswap:  'return tog_gunswap;',
+};
+const FEAT_TOGGLE = {
+  autoping: '{ if ( tog_autoping ) tog_autoping = 0; else tog_autoping = 1; }',
+  pingcd:   '{ val_ping_cd = val_ping_cd + 1; if ( val_ping_cd > 5 ) val_ping_cd = 0; }',
+  hairtrig: '{ if ( tog_hairtrig ) tog_hairtrig = 0; else tog_hairtrig = 1; }',
+  autorun:  '{ if ( tog_easysprint ) tog_easysprint = 0; else tog_easysprint = 1; }',
+  flipped:  '{ if ( tog_flipped ) tog_flipped = 0; else tog_flipped = 1; SaveSystem(); }',
+  norumble: '{ if ( tog_norumble ) tog_norumble = 0; else tog_norumble = 1; }',
+  mfix:     '{ if ( tog_mfix ) tog_mfix = 0; else tog_mfix = 1; }',
+  gunswap:  '{ if ( tog_gunswap ) tog_gunswap = 0; else tog_gunswap = 1; }',
+};
+// OLED-Namenszüge der Features (math_temp-Blöcke)
+const FEAT_NAME_DRAW = {
+  autoping: `sx = 14; draw_A(); sx = sx + 7; draw_U(); sx = sx + 7; draw_T(); sx = sx + 7; draw_O(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_P(); sx = sx + 7; draw_I(); sx = sx + 7; draw_N(); sx = sx + 7; draw_G();`,
+  pingcd:   `sx = 14; draw_P(); sx = sx + 7; draw_I(); sx = sx + 7; draw_N(); sx = sx + 7; draw_G(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_C(); sx = sx + 7; draw_D();`,
+  hairtrig: `sx = 14; draw_H(); sx = sx + 7; draw_A(); sx = sx + 7; draw_I(); sx = sx + 7; draw_R(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_T(); sx = sx + 7; draw_R(); sx = sx + 7; draw_I(); sx = sx + 7; draw_G();`,
+  autorun:  `sx = 14; draw_A(); sx = sx + 7; draw_U(); sx = sx + 7; draw_T(); sx = sx + 7; draw_O(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_R(); sx = sx + 7; draw_U(); sx = sx + 7; draw_N();`,
+  flipped: `sx = 14;
+            if (tog_ps5) {
+                draw_L(); sx = sx + 6; digit_num = 2; draw_medium_digit(); sx = sx + 6; draw_SLASH(); sx = sx + 5; draw_L(); sx = sx + 6; digit_num = 1; draw_medium_digit(); sx = sx + 8; draw_R(); sx = sx + 6; digit_num = 2; draw_medium_digit(); sx = sx + 6; draw_SLASH(); sx = sx + 5; draw_R(); sx = sx + 6; digit_num = 1; draw_medium_digit();
+            } else {
+                draw_L(); sx = sx + 6; draw_T(); sx = sx + 6; draw_SLASH(); sx = sx + 5; draw_L(); sx = sx + 6; draw_B(); sx = sx + 8; draw_R(); sx = sx + 6; draw_T(); sx = sx + 6; draw_SLASH(); sx = sx + 5; draw_R(); sx = sx + 6; draw_B();
+            }`,
+  norumble: `sx = 14; draw_N(); sx = sx + 7; draw_O(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_R(); sx = sx + 7; draw_U(); sx = sx + 7; draw_M(); sx = sx + 7; draw_B(); sx = sx + 7; draw_L(); sx = sx + 7; draw_E();`,
+  mfix:     `sx = 14; draw_M(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_F(); sx = sx + 7; draw_I(); sx = sx + 7; draw_X();`,
+  gunswap:  `sx = 14; draw_G(); sx = sx + 7; draw_U(); sx = sx + 7; draw_N(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_W(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P();`,
+};
+
+// GetCurrentToggle-Block der FEATURES-Seite
+FRAG.featGetToggle = ctx => {
+  const F = ctx.feats;
+  if (ctx.hasFeat('autoping')) {
+    const withPing = F.slice(1).map((f, k) => `            if ( feature_idx == ${k + 2} ) ${FEAT_GET[f]}`).join('\n');
+    const noPing = F.slice(1).map((f, k) => `            if ( feature_idx == ${k + 1} ) ${FEAT_GET[f]}`).join('\n');
+    return `    if ( page_index == ${ctx.I.features} ) {
+        if ( feature_idx == 0 ) return tog_autoping;
+        if ( tog_autoping ) {
+            if ( feature_idx == 1 ) ${FEAT_GET.pingcd}
+${withPing}
+        } else {
+${noPing}
+        }
+    }
+`;
+  }
+  const chain = F.map((f, k) => `        if ( feature_idx == ${k} ) ${FEAT_GET[f]}`).join('\n');
+  return `    if ( page_index == ${ctx.I.features} ) {\n${chain}\n    }\n`;
+};
+
+// ToggleCurrentMod-Block der FEATURES-Seite
+FRAG.featToggleMod = ctx => {
+  const F = ctx.feats;
+  if (ctx.hasFeat('autoping')) {
+    const withPing = F.slice(1).map((f, k) => `            if ( feature_idx == ${k + 2} ) ${FEAT_TOGGLE[f]}`).join('\n');
+    const noPing = F.slice(1).map((f, k) => `            if ( feature_idx == ${k + 1} ) ${FEAT_TOGGLE[f]}`).join('\n');
+    return `    if ( page_index == ${ctx.I.features} ) {
+        if ( feature_idx == 0 ) ${FEAT_TOGGLE.autoping}
+        if ( tog_autoping ) {
+            if ( feature_idx == 1 ) ${FEAT_TOGGLE.pingcd}
+${withPing}
+        } else {
+${noPing}
+        }
+    }
+`;
+  }
+  const chain = F.map((f, k) => `        if ( feature_idx == ${k} ) ${FEAT_TOGGLE[f]}`).join('\n');
+  return `    if ( page_index == ${ctx.I.features} ) {\n${chain}\n    }\n`;
+};
+
+// ============================================================================
+// GENERATOR: setzt aus Skelett + Fragmenten das fertige GPC-Script zusammen
+// ============================================================================
+
+// ---- OLED-Seitentitel (DrawFinalMenu) ----
+const DRAW_TITLE = {
+  recoil: i => `    if ( page_index == ${i} ) { sx = 25; draw_A(); sx = sx + 7; draw_N(); sx = sx + 7; draw_T(); sx = sx + 7; draw_I(); sx = sx + 5; draw_HYP(); sx = sx + 5; draw_R(); sx = sx + 7; draw_E(); sx = sx + 7; draw_C(); sx = sx + 7; draw_O(); sx = sx + 7; draw_I(); sx = sx + 7; draw_L(); }`,
+  smart: i => `    if ( page_index == ${i} ) { sx = 25; draw_S(); sx = sx + 7; draw_M(); sx = sx + 8; draw_A(); sx = sx + 7; draw_R(); sx = sx + 7; draw_T(); sx = sx + 5; draw_HYP(); sx = sx + 5; draw_R(); sx = sx + 7; draw_E(); sx = sx + 7; draw_C(); sx = sx + 7; draw_O(); sx = sx + 7; draw_I(); sx = sx + 7; draw_L(); }`,
+  aim: i => `    if ( page_index == ${i} ) { sx = 29; draw_A(); sx = sx + 7; draw_I(); sx = sx + 7; draw_M(); sx = sx + 10; draw_A(); sx = sx + 7; draw_S(); sx = sx + 7; draw_S(); sx = sx + 7; draw_I(); sx = sx + 7; draw_S(); sx = sx + 7; draw_T(); }`,
+  roll: i => `    if ( page_index == ${i} ) { sx = 28; draw_E(); sx = sx + 7; draw_A(); sx = sx + 7; draw_S(); sx = sx + 7; draw_Y(); sx = sx + 10; draw_R(); sx = sx + 7; draw_O(); sx = sx + 7; draw_L(); sx = sx + 7; draw_L(); }`,
+  light: i => `    if ( page_index == ${i} ) { sx = 22; draw_R(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); sx = sx + 7; draw_I(); sx = sx + 7; draw_D(); sx = sx + 8; draw_HYP(); sx = sx + 8; draw_L(); sx = sx + 7; draw_I(); sx = sx + 7; draw_G(); sx = sx + 7; draw_H(); sx = sx + 7; draw_T(); }`,
+  rapidfire: i => `    if ( page_index == ${i} ) { sx = 31; draw_R(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); sx = sx + 7; draw_I(); sx = sx + 7; draw_D(); sx = sx + 7; draw_F(); sx = sx + 7; draw_I(); sx = sx + 7; draw_R(); sx = sx + 7; draw_E(); }`,
+  snaphook: (i, ctx) => ctx.hasFeat('gunswap')
+    ? `    if ( page_index == ${i} ) {
+        if ( tog_gunswap ) { sx = 30; draw_G(); sx = sx + 7; draw_U(); sx = sx + 7; draw_N(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_W(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); }
+        else { sx = 30; draw_F(); sx = sx + 7; draw_A(); sx = sx + 7; draw_S(); sx = sx + 7; draw_T(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_N(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); }
+    }`
+    : `    if ( page_index == ${i} ) { sx = 30; draw_F(); sx = sx + 7; draw_A(); sx = sx + 7; draw_S(); sx = sx + 7; draw_T(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_N(); sx = sx + 7; draw_A(); sx = sx + 7; draw_P(); }`,
+  dontshoot: i => `    if ( page_index == ${i} ) { sx = 20; draw_D(); sx = sx + 7; draw_O(); sx = sx + 7; draw_N(); sx = sx + 7; draw_T(); sx = sx + 5; draw_HYP(); sx = sx + 5; draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T(); }`,
+  features: i => `    if ( page_index == ${i} ) { sx = 25; draw_F(); sx = sx + 7; draw_E(); sx = sx + 7; draw_A(); sx = sx + 7; draw_T(); sx = sx + 7; draw_U(); sx = sx + 7; draw_R(); sx = sx + 7; draw_E(); sx = sx + 7; draw_S(); }`,
+  dropjump: i => `    if ( page_index == ${i} ) { sx = 18; draw_D(); sx = sx + 7; draw_R(); sx = sx + 7; draw_O(); sx = sx + 7; draw_P(); sx = sx + 6; draw_SLASH(); sx = sx + 6; draw_J(); sx = sx + 7; draw_U(); sx = sx + 7; draw_M(); sx = sx + 7; draw_P(); }`,
+};
+
+// ---- OLED-Seitenkörper (DrawFinalMenu) ----
+function bigDigitBody(i, dx, dx10) {
+  return `    if ( page_index == ${i} ) {
+        d_val = GetCurrentVal(); d_y = 20;
+
+        if ( d_val == 10 ) {
+            digit_num = 1;
+            d_x = ${dx10};
+            draw_big_digit();
+            digit_num = 0;
+            d_x = d_x + 20;
+            draw_big_digit();
+        } else {
+            digit_num = d_val;
+            d_x = ${dx};
+            draw_big_digit();
+        }
+    }`;
+}
+
+const DRAW_BODY = {
+  recoil: i => `    if ( page_index == ${i} ) {
+        d_val = val_recoil; d_y = 20;
+        if ( d_val < 0 ) {
+            d_val = abs( d_val );
+            int_p = d_val / 2;
+            if ( int_p == 10 ) d_x = 0; else d_x = 10;
+            rect_oled( d_x, d_y + 11, 6, 3, 1, 1 );
+        } else {
+            int_p = d_val / 2;
+        }
+
+        frac_p = ( d_val % 2 ) * 5;
+
+        if ( int_p == 10 ) {
+            digit_num = 1; d_x = 8; draw_big_digit();
+            digit_num = 0; d_x = 25; draw_big_digit();
+            d_x = 42;
+        } else {
+            digit_num = int_p; d_x = 18; draw_big_digit();
+            d_x = 35;
+        }
+
+        if ( frac_p > 0 ) {
+            rect_oled( d_x, d_y + 21, 2, 2, 1, 1 );
+            digit_num = 5; sx = d_x + 4; sy = d_y + 14; draw_medium_digit();
+        }
+    }`,
+  smart: i => `    if ( page_index == ${i} ) {
+        line_oled( 22, 14, 22, 50, 1, 1 ); line_oled( 4, 32, 40, 32, 1, 1 );
+        cx = 22 + ( smart_x * 4 ) / 5; cy = 32 + ( val_recoil * 4 ) / 5;
+        line_oled( 22, 32, cx, cy, 1, 1 ); rect_oled( cx - 2, cy - 2, 5, 5, 0, 1 );
+        if ( text_timer == 0 ) {
+            sx = 50; sy = 17; draw_X(); sx = 60; d_val = smart_x;
+            if ( d_val < 0 ) { line_oled( sx, sy + 4, sx + 3, sy + 4, 1, 1 ); sx = sx + 5; d_val = abs( d_val ); }
+            int_p = d_val / 2; frac_p = ( d_val % 2 ) * 5;
+            digit_num = int_p;
+            if ( int_p == 10 ) { digit_num = 1; draw_medium_digit(); sx = sx + 7; digit_num = 0; }
+            draw_medium_digit();
+            if ( frac_p > 0 ) { sx = sx + 6; rect_oled( sx, sy + 7, 2, 2, 1, 1 ); sx = sx + 3; digit_num = 5; draw_medium_digit(); }
+
+            sx = 50; sy = 37; draw_Y(); sx = 60; d_val = val_recoil;
+            if ( d_val < 0 ) { line_oled( sx, sy + 4, sx + 3, sy + 4, 1, 1 ); sx = sx + 5; d_val = abs( d_val ); }
+            int_p = d_val / 2; frac_p = ( d_val % 2 ) * 5;
+            digit_num = int_p;
+            if ( int_p == 10 ) { digit_num = 1; draw_medium_digit(); sx = sx + 7; digit_num = 0; }
+            draw_medium_digit();
+            if ( frac_p > 0 ) { sx = sx + 6; rect_oled( sx, sy + 7, 2, 2, 1, 1 ); sx = sx + 3; digit_num = 5; draw_medium_digit(); }
+        }
+    }`,
+  aim: i => bigDigitBody(i, 10, 0),
+  roll: i => bigDigitBody(i, 45, 35),
+  light: i => bigDigitBody(i, 45, 35),
+  rapidfire: i => bigDigitBody(i, 25, 15),
+  snaphook: i => `    if ( page_index == ${i} ) {
+        sx = 13; sy = 27; draw_L(); sx = sx + 8;
+        if (tog_ps5) { digit_num = 2; draw_medium_digit(); } else { draw_T(); }
+        sx = sx + 8; draw_PLUS_BIG();
+
+        box_x = 40; box_y = 22; rect_oled( box_x, box_y, 25, 18, 0, 1 );
+        if ( fsh_edit_mode ) { fsh_blink_timer = ( fsh_blink_timer + get_rtime() ) % 400;
+        if ( fsh_blink_timer < 200 ) { rect_oled( box_x + 2, box_y + 2, 21, 14, 1, 1 ); } }
+        else { sx = box_x + 8; sy = box_y + 5; icon_btn = ssh_trigger; DrawButtonIcon(); }
+
+        box_x = 76; box_y = 38; rect_oled( box_x, box_y, 34, 13, 0, 1 );
+        if ( tog_ps5 ) {
+            sx = box_x + 8; sy = box_y + 2; draw_P(); sx = sx + 7; draw_S(); sx = sx + 7; digit_num = 5; draw_medium_digit();
+        } else {
+            sx = box_x + 4; sy = box_y + 2; draw_X(); sx = sx + 7; draw_B(); sx = sx + 7; draw_O(); sx = sx + 7; draw_X();
+        }
+    }`,
+  dontshoot: i => `    if ( page_index == ${i} ) {
+        if ( ds_time_edit_mode ) {
+            sx = 2; sy = 25; if (tog_ps5) draw_btn_SQUARE(); else draw_btn_X();
+            sx = 11; digit_num = ds_delay / 100;
+            if ( digit_num > 0 ) { draw_medium_digit(); sx = sx + 6; }
+            digit_num = ( ds_delay / 10 ) % 10; draw_medium_digit(); sx = sx + 6; digit_num = 0; draw_medium_digit();
+
+            sx = 35; sy = 25; if (tog_ps5) draw_btn_CIRCLE(); else draw_btn_B();
+            sx = 44; digit_num = ds_hold / 100;
+            if ( digit_num > 0 ) { draw_medium_digit(); sx = sx + 6; }
+            digit_num = ( ds_hold / 10 ) % 10; draw_medium_digit(); sx = sx + 6; digit_num = 0; draw_medium_digit();
+        } else {
+            sx = 5; sy = 27; draw_H(); sx = sx + 6; draw_O(); sx = sx + 6; draw_L(); sx = sx + 6; draw_D();
+            box_x = 35; box_y = 22; rect_oled( box_x, box_y, 25, 18, 0, 1 );
+            if ( ds_btn_edit_mode ) { fsh_blink_timer = ( fsh_blink_timer + get_rtime() ) % 400;
+            if ( fsh_blink_timer < 200 ) { rect_oled( box_x + 2, box_y + 2, 21, 14, 1, 1 ); } }
+            else { sx = box_x + 8; sy = box_y + 5; icon_btn = ds_trigger; DrawButtonIcon(); }
+        }
+    }`,
+  features: (i, ctx) => {
+    const F = ctx.feats;
+    let map, names = '';
+    if (ctx.hasFeat('autoping')) {
+      map = `        if ( feature_idx == 0 ) math_temp = 0;
+        else if ( tog_autoping && feature_idx == 1 ) math_temp = 99;
+        else if ( tog_autoping ) math_temp = feature_idx - 1;
+        else math_temp = feature_idx;`;
+      names = `        if ( math_temp == 99 ) { ${FEAT_NAME_DRAW.pingcd} }\n`;
+    } else {
+      map = `        math_temp = feature_idx;`;
+    }
+    names += F.map((f, k) => `        if ( math_temp == ${k} ) { ${FEAT_NAME_DRAW[f]} }`).join('\n');
+    return `    if ( page_index == ${i} ) {
+        icon_btn = XB1_UP; sx = 5; sy = 20; DrawButtonIcon();
+        icon_btn = XB1_DOWN; sx = 5; sy = 38; DrawButtonIcon();
+        sy = 27;
+${map}
+${names}
+    }`;
+  },
+  dropjump: i => `    if ( page_index == ${i} ) {
+        icon_btn = XB1_UP; sx = 5; sy = 20; DrawButtonIcon();
+        icon_btn = XB1_DOWN; sx = 5; sy = 38; DrawButtonIcon();
+        sy = 27;
+        // Reihenfolge: 0=DROP, 1=JUMP, 2=SPAM (ds oder js), 3=COMBO-TOG
+        if ( dj_idx == 0 ) math_temp = 0;
+        else if ( dj_idx == 1 ) math_temp = 2;
+        else if ( dj_idx == 2 ) {
+            if ( tog_dropshot ) math_temp = 1;
+            else if ( tog_jumpshot ) math_temp = 3;
+            else math_temp = 4;
+        }
+        else math_temp = 4;
+        if ( math_temp == 0 ) { sx = 14; draw_D(); sx = sx + 7; draw_R(); sx = sx + 7; draw_O(); sx = sx + 7; draw_P(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T(); }
+        if ( math_temp == 1 ) { sx = 14; draw_D(); sx = sx + 7; draw_S(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_P(); sx = sx + 7; draw_A(); sx = sx + 7; draw_M(); }
+        if ( math_temp == 2 ) { sx = 14; draw_J(); sx = sx + 7; draw_U(); sx = sx + 7; draw_M(); sx = sx + 7; draw_P(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_H(); sx = sx + 7; draw_O(); sx = sx + 7; draw_T(); }
+        if ( math_temp == 3 ) { sx = 14; draw_J(); sx = sx + 7; draw_S(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_S(); sx = sx + 7; draw_P(); sx = sx + 7; draw_A(); sx = sx + 7; draw_M(); }
+        if ( math_temp == 4 ) { sx = 14; draw_C(); sx = sx + 7; draw_O(); sx = sx + 7; draw_M(); sx = sx + 7; draw_B(); sx = sx + 7; draw_O(); sx = sx + 7; draw_HYP(); sx = sx + 7; draw_T(); sx = sx + 7; draw_O(); sx = sx + 7; draw_G(); }
+    }`,
+};
+
+// ---- DrawFinalMenu komplett zusammensetzen ----
+function buildDrawFinalMenu(ctx) {
+  const { I, has, hasFeat, N } = ctx;
+  const parts = [];
+  parts.push(`combo DrawFinalMenu {
+    cls_oled( 0 ); rect_oled( 0, 0, SCREEN_W, SCREEN_H, 0, 1 );
+    sy = 3;`);
+  // Titel
+  for (const m of MODULES) if (has(m.id)) parts.push(DRAW_TITLE[m.id](I[m.id], ctx));
+  parts.push('');
+  // Körper
+  for (const m of MODULES) if (has(m.id)) parts.push(DRAW_BODY[m.id](I[m.id], ctx));
+  // Checkbox + ON/OFF für Standard-Seiten
+  const boxPages = ['recoil', 'aim', 'roll', 'light', 'rapidfire', 'features', 'dropjump'].filter(has);
+  if (boxPages.length) {
+    const cond = boxPages.map(id => `page_index == ${I[id]}`).join(' || ');
+    const fd = ['features', 'dropjump'].filter(has);
+    const fdCond = fd.map(id => `page_index == ${I[id]}`).join(' || ');
+    const boxPos = fd.length
+      ? `        if ( ${fdCond} ) { box_y = 24; box_x = 110; }
+        else { box_y = 16; box_x = 95; }`
+      : `        box_y = 16; box_x = 95;`;
+    const syLine = fd.length
+      ? `            if ( ${fdCond} ) sy = 27; else sy = box_y + 3;`
+      : `            sy = box_y + 3;`;
+    const onSx = fd.length ? `if ( ${fdCond} ) sx = 85; else sx = 78;` : `sx = 78;`;
+    const offSx = fd.length ? `if ( ${fdCond} ) sx = 80; else sx = 70;` : `sx = 70;`;
+    const specials = [];
+    if (has('features') && hasFeat('autoping')) {
+      specials.push(`if ( page_index == ${I.features} && math_temp == 99 ) {
+                if ( val_ping_cd == 0 ) {
+                    sx = 80; draw_O(); sx = sx + 7; draw_F(); sx = sx + 7; draw_F();
+                } else {
+                    sx = 80; digit_num = val_ping_cd; draw_medium_digit();
+                    sx = sx + 7; draw_S(); sx = sx + 7; draw_E(); sx = sx + 7; draw_C();
+                }
+            }`);
+    }
+    if (has('dropjump')) {
+      specials.push(`if ( page_index == ${I.dropjump} && math_temp == 1 ) {
+                if ( val_ds_spam == 0 ) {
+                    sx = 80; draw_O(); sx = sx + 7; draw_F(); sx = sx + 7; draw_F();
+                } else {
+                    sx = 85; digit_num = val_ds_spam; draw_medium_digit();
+                }
+            }`);
+      specials.push(`if ( page_index == ${I.dropjump} && math_temp == 3 ) {
+                if ( val_js_spam == 0 ) {
+                    sx = 80; draw_O(); sx = sx + 7; draw_F(); sx = sx + 7; draw_F();
+                } else {
+                    sx = 85; digit_num = val_js_spam; draw_medium_digit();
+                }
+            }`);
+    }
+    specials.push(`if ( GetCurrentToggle() ) {
+                ${onSx}
+                draw_O(); sx = sx + 7; draw_N();
+            } else {
+                ${offSx}
+                draw_O(); sx = sx + 7; draw_F(); sx = sx + 7; draw_F();
+            }`);
+    parts.push(`
+    if ( ${cond} ) {
+${boxPos}
+
+        show_text = 1;
+        if ( show_text ) {
+${syLine}
+            ${specials.join('\n            else ')}
+        }
+
+        rect_oled( box_x, box_y, 14, 14, 0, 1 );
+        if ( GetCurrentToggle() ) {
+            line_oled( box_x + 3, box_y + 7, box_x + 6, box_y + 10, 1, 1 );
+            line_oled( box_x + 6, box_y + 10, box_x + 11, box_y + 3, 1, 1 );
+        }
+        else {
+            line_oled( box_x + 3, box_y + 3, box_x + 10, box_y + 10, 1, 1 );
+            line_oled( box_x + 10, box_y + 3, box_x + 3, box_y + 10, 1, 1 );
+        }
+    }`);
+  }
+  // SMART RECOIL: Checkbox mit Text-Timer
+  if (has('smart')) {
+    parts.push(`
+    if ( page_index == ${I.smart} ) {
+        box_y = 16; box_x = 95;
+        show_text = 1; if ( text_timer > 0 ) { text_timer = text_timer - get_rtime(); show_text = 1; } else { show_text = 0; }
+        if ( show_text ) { sy = box_y + 3; if ( GetCurrentToggle() ) { sx = 78; draw_O(); sx = 86; draw_N(); } else { sx = 70; draw_O(); sx = 78; draw_F(); sx = 86; draw_F(); } }
+        rect_oled( box_x, box_y, 14, 14, 0, 1 );
+        if ( GetCurrentToggle() ) { line_oled( box_x + 3, box_y + 7, box_x + 6, box_y + 10, 1, 1 ); line_oled( box_x + 6, box_y + 10, box_x + 11, box_y + 3, 1, 1 ); }
+        else { line_oled( box_x + 3, box_y + 3, box_x + 10, box_y + 10, 1, 1 ); line_oled( box_x + 10, box_y + 3, box_x + 3, box_y + 10, 1, 1 ); }
+    }`);
+  }
+  // SNAP HOOK / DONT SHOOT: Checkbox
+  const sd = ['snaphook', 'dontshoot'].filter(has);
+  if (sd.length) {
+    parts.push(`
+    if ( ${sd.map(id => `page_index == ${I[id]}`).join(' || ')} ) {
+        box_y = 22; box_x = 95;
+        show_text = 1; sy = box_y + 3;
+        if ( GetCurrentToggle() ) { sx = 78; draw_O(); sx = 86; draw_N(); } else { sx = 70; draw_O(); sx = 78; draw_F(); sx = 86; draw_F(); }
+        rect_oled( box_x, box_y, 14, 14, 0, 1 );
+        if ( GetCurrentToggle() ) { line_oled( box_x + 3, box_y + 7, box_x + 6, box_y + 10, 1, 1 ); line_oled( box_x + 6, box_y + 10, box_x + 11, box_y + 3, 1, 1 ); }
+        else { line_oled( box_x + 3, box_y + 3, box_x + 10, box_y + 10, 1, 1 ); line_oled( box_x + 10, box_y + 3, box_x + 3, box_y + 10, 1, 1 ); }
+    }`);
+  }
+  // ADS+RT-Checkbox (Recoil / Smart / Aim)
+  const adsPages = ['recoil', 'smart', 'aim'].filter(has);
+  if (adsPages.length) {
+    const fills = [];
+    if (has('recoil')) fills.push(`        if ( page_index == ${I.recoil} && tog_rec_fire ) box_fill = 1;`);
+    if (has('smart')) fills.push(`        if ( page_index == ${I.smart} && tog_smart_fire ) box_fill = 1;`);
+    if (has('aim')) fills.push(`        if ( page_index == ${I.aim} && tog_aim_fire ) box_fill = 1;`);
+    parts.push(`
+    if ( ${adsPages.map(id => `page_index == ${I[id]}`).join(' || ')} ) {
+        box_y = 34; box_x = 95;
+        if ( show_text ) { sx = 52; sy = 36; draw_A(); sx = sx + 7; draw_D(); sx = sx + 7; draw_S(); sx = sx + 6; draw_PLUS_BIG(); sx = sx + 8; draw_R(); sx = sx + 7; if (tog_ps5) { digit_num = 2; draw_medium_digit(); } else { draw_T(); } }
+        rect_oled( box_x, box_y, 14, 14, 0, 1 );
+        box_fill = 0;
+${fills.join('\n')}
+        if ( box_fill ) { line_oled( box_x + 3, box_y + 7, box_x + 6, box_y + 10, 1, 1 ); line_oled( box_x + 6, box_y + 10, box_x + 11, box_y + 3, 1, 1 ); }
+        else { line_oled( box_x + 3, box_y + 3, box_x + 10, box_y + 10, 1, 1 ); line_oled( box_x + 10, box_y + 3, box_x + 3, box_y + 10, 1, 1 ); }
+    }`);
+  }
+  // AIM ASSIST: Geschwindigkeitsanzeige
+  if (has('aim')) {
+    parts.push(`
+    if ( page_index == ${I.aim} ) {
+        sx = 38; sy = 19;
+        draw_S(); sx = sx + 7; draw_P(); sx = sx + 7; draw_D(); sx = sx + 8;
+        if ( val_aa_speed == 10 ) { digit_num = 1; draw_medium_digit(); sx = sx + 6; digit_num = 0; draw_medium_digit(); }
+        else { digit_num = val_aa_speed; draw_medium_digit(); }
+    }`);
+  }
+  // RAPID FIRE: LED-Box
+  if (has('rapidfire')) {
+    parts.push(`
+    if ( page_index == ${I.rapidfire} ) {
+        box_y = 34; box_x = 95;
+        if ( show_text ) { sx = 67; sy = 36; draw_L(); sx = 76; draw_E(); sx = 85; draw_D(); }
+        rect_oled( box_x, box_y, 14, 14, 0, 1 );
+        sx = box_x + 3; sy = box_y + 3;
+        if ( rf_led_mode == 0 ) { line_oled( sx, sy, sx + 7, sy + 7, 1, 1 ); line_oled( sx + 7, sy, sx, sy + 7, 1, 1 ); }
+        if ( rf_led_mode == 1 ) { sx = sx + 1; sy = sy - 1; draw_R(); } if ( rf_led_mode == 2 ) { sx = sx + 1; sy = sy - 1; draw_G(); }
+        if ( rf_led_mode == 3 ) { sx = sx + 1; sy = sy - 1; draw_B(); } if ( rf_led_mode == 4 ) { if ( ( rgb_timer % 500 ) < 250 ) rect_oled( box_x + 2, box_y + 2, 10, 10, 1, 1 ); }
+    }`);
+  }
+  // Wert-Balken unten
+  const barExcl = ['smart', 'snaphook', 'dontshoot', 'features'].filter(has).map(id => `page_index != ${I[id]}`);
+  const barCond = barExcl.length ? barExcl.join(' && ') : '1';
+  const barVal = has('recoil')
+    ? `        if ( page_index == ${I.recoil} ) d_val = val_recoil / 2; else d_val = GetCurrentVal();`
+    : `        d_val = GetCurrentVal();`;
+  parts.push(`
+    if ( ${barCond} ) {
+        rect_oled( 40, 50, 86, 5, 0, 1 );
+${barVal}
+        if ( d_val != 0 ) {
+            if ( d_val < 0 ) {
+                math_temp = abs( d_val ) * 8;
+                rect_oled( 126 - math_temp, 52, math_temp, 1, 1, 1 );
+            } else {
+                rect_oled( 42, 52, d_val * 8, 1, 1, 1 );
+            }
+        }
+    }`);
+  // Seiten-Punkte (max. 9 passen neben die Seitenzahl)
+  const D = Math.min(N, 9);
+  const px = 30 + Math.floor((96 - (D * 10 - 2)) / 2);
+  const dots = [];
+  for (let i = 0; i < D; i++) {
+    dots.push(`    if ( page_index == ${i} ) rect_oled( ${px + i * 10}, 58, 8, 5, 1, 1 ); else rect_oled( ${px + i * 10 + 2}, 59, 4, 3, 0, 1 );`);
+  }
+  parts.push('\n' + dots.join('\n'));
+  // M-Modus-Anzeige oben links
+  parts.push(`
+    sx = 2; sy = 2; draw_M(); sx = sx + 7;
+    if ( profile_mode == 0 ) digit_num = 1; if ( profile_mode == 1 ) digit_num = 2; if ( profile_mode == 2 ) digit_num = 5;
+    draw_medium_digit();
+
+    if ( profile_mode != 0 ) {
+        sx = 5; sy = 14;
+        if ( profile_mode == 1 ) digit_num = m2_prof; if ( profile_mode == 2 ) digit_num = m5_prof;
+        draw_medium_digit();
+    }`);
+  // Seitenzahl unten links (+ Sub-Nummern)
+  if (N === 10) {
+    parts.push(`
+    // Seitennummer unten links.
+    if ( page_index == 9 ) {
+        sx = 0; sy = 48; digit_num = 1; draw_page_digit();
+        sx = 8; sy = 48; draw_page_digit_zero();
+    } else {
+        sx = 4; sy = 48; digit_num = page_index + 1; draw_page_digit();
+    }`);
+  } else {
+    parts.push(`
+    // Seitennummer unten links.
+    sx = 4; sy = 48; digit_num = page_index + 1; draw_page_digit();`);
+  }
+  if (has('features')) {
+    parts.push(`    // Sub-Nummer "X.Y" auf der Features-Seite
+    if ( page_index == ${I.features} ) {
+        rect_oled( 16, 60, 2, 2, 1, 1 );
+        sx = 20; sy = 53; digit_num = feature_idx + 1;
+        draw_medium_digit();
+    }`);
+  }
+  if (has('dropjump')) {
+    const isTen = I.dropjump === 9;
+    parts.push(`    // Sub-Nummer "X.Y" auf der Drop/Jump-Seite
+    if ( page_index == ${I.dropjump} ) {
+        rect_oled( ${isTen ? 20 : 16}, 60, 2, 2, 1, 1 );
+        sx = ${isTen ? 23 : 20}; sy = 53; digit_num = dj_idx + 1; draw_medium_digit();
+    }`);
+  }
+  parts.push(`
+    wait( 100 );
+}`);
+  return parts.join('\n');
+}
+
+// ---- Dispatch-Funktionen ----
+function buildGetCurrentVal(ctx) {
+  const map = { recoil: 'val_recoil', aim: 'val_aim', roll: 'val_jump', light: 'val_rapid', rapidfire: 'val_fire' };
+  const lines = Object.keys(map).filter(ctx.has).map(id => `    if ( page_index == ${ctx.I[id]} ) return ${map[id]};`);
+  return `function GetCurrentVal() {\n${lines.join('\n')}${lines.length ? '\n' : ''}    return 0;\n}`;
+}
+
+function buildGetCurrentToggle(ctx) {
+  const map = { recoil: 'tog_recoil', smart: 'tog_smart', aim: 'tog_aim', roll: 'tog_jump', light: 'tog_rapid', rapidfire: 'tog_fire', snaphook: 'tog_ssh', dontshoot: 'tog_dontshoot' };
+  let s = 'function GetCurrentToggle() {\n';
+  for (const m of MODULES) {
+    if (!ctx.has(m.id)) continue;
+    if (map[m.id]) s += `    if ( page_index == ${ctx.I[m.id]} ) return ${map[m.id]};\n`;
+    else if (m.id === 'features') s += FRAG.featGetToggle(ctx);
+    else if (m.id === 'dropjump') s += `    if ( page_index == ${ctx.I.dropjump} ) {
+        if ( dj_idx == 0 ) return tog_dropshot;
+        if ( dj_idx == 1 ) return tog_jumpshot;
+        if ( dj_idx == 2 ) {
+            if ( tog_dropshot ) { if ( val_ds_spam > 0 ) return 1; else return 0; }
+            if ( tog_jumpshot ) { if ( val_js_spam > 0 ) return 1; else return 0; }
+            return tog_dj_combo;
+        }
+        if ( dj_idx == 3 ) return tog_dj_combo;
+    }
+`;
+  }
+  s += '    return 0;\n}';
+  return s;
+}
+
+function buildToggleCurrentMod(ctx) {
+  const { I, has } = ctx;
+  let s = 'function ToggleCurrentMod() {\n';
+  if (has('recoil')) s += `    if ( page_index == ${I.recoil} ) { if ( tog_recoil ) tog_recoil = 0; else { tog_recoil = 1;${has('smart') ? ' tog_smart = 0;' : ''} } }\n`;
+  if (has('smart')) s += `    if ( page_index == ${I.smart} ) { text_timer = 2000; if ( tog_smart ) tog_smart = 0; else { tog_smart = 1;${has('recoil') ? ' tog_recoil = 0;' : ''} } }\n`;
+  if (has('aim')) s += `    if ( page_index == ${I.aim} ) { if ( tog_aim ) tog_aim = 0; else tog_aim = 1; }\n`;
+  if (has('roll')) s += `    if ( page_index == ${I.roll} ) { if ( tog_jump ) tog_jump = 0; else tog_jump = 1; }\n`;
+  if (has('light')) s += `    if ( page_index == ${I.light} ) { if ( tog_rapid ) tog_rapid = 0; else tog_rapid = 1; }\n`;
+  if (has('rapidfire')) s += `    if ( page_index == ${I.rapidfire} ) { if ( tog_fire ) tog_fire = 0; else tog_fire = 1; }\n`;
+  if (has('snaphook')) s += `    if ( page_index == ${I.snaphook} ) { if ( tog_ssh ) tog_ssh = 0; else tog_ssh = 1; }\n`;
+  if (has('dontshoot')) s += `    if ( page_index == ${I.dontshoot} ) { if ( tog_dontshoot ) tog_dontshoot = 0; else tog_dontshoot = 1; }\n`;
+  if (has('features')) s += FRAG.featToggleMod(ctx);
+  if (has('dropjump')) s += `    if ( page_index == ${I.dropjump} ) {
+        if ( dj_idx == 0 ) {
+            if ( tog_dropshot ) tog_dropshot = 0;
+            else { tog_dropshot = 1; tog_jumpshot = 0; }
+        }
+        else if ( dj_idx == 1 ) {
+            if ( tog_jumpshot ) tog_jumpshot = 0;
+            else { tog_jumpshot = 1; tog_dropshot = 0; }
+        }
+        else if ( dj_idx == 2 ) {
+            if ( tog_dropshot ) { val_ds_spam = val_ds_spam + 1; if ( val_ds_spam > 5 ) val_ds_spam = 0; }
+            else if ( tog_jumpshot ) { val_js_spam = val_js_spam + 1; if ( val_js_spam > 5 ) val_js_spam = 0; }
+            else { if ( tog_dj_combo ) tog_dj_combo = 0; else tog_dj_combo = 1; }
+        }
+        else if ( dj_idx == 3 ) { if ( tog_dj_combo ) tog_dj_combo = 0; else tog_dj_combo = 1; }
+    }
+`;
+  s += '    SaveProfile();\n';
+  const sync = ['snaphook', 'dontshoot', 'features'].filter(has).map(id => `page_index == ${I[id]}`);
+  if (sync.length) s += `    if ( ${sync.join(' || ')} ) SyncM2Toggles();\n`;
+  s += '}';
+  return s;
+}
+
+function buildModifyValue(ctx) {
+  const { I, has } = ctx;
+  const lines = [];
+  const rs = ['recoil', 'smart'].filter(has).map(id => `page_index == ${I[id]}`);
+  if (rs.length) lines.push(`    if ( ${rs.join(' || ')} ) { val_recoil = val_recoil + math_temp; if ( val_recoil > 20 ) val_recoil = 20; if ( val_recoil < -20 ) val_recoil = -20; SaveProfile(); }`);
+  if (has('aim')) lines.push(`    if ( page_index == ${I.aim} ) { val_aim = val_aim + math_temp; if ( val_aim > 10 ) val_aim = 10; if ( val_aim < 0 ) val_aim = 0; SaveProfile(); }`);
+  if (has('roll')) lines.push(`    if ( page_index == ${I.roll} ) { val_jump = val_jump + math_temp; if ( val_jump > 10 ) val_jump = 10; if ( val_jump < 0 ) val_jump = 0; SaveProfile(); }`);
+  if (has('light')) lines.push(`    if ( page_index == ${I.light} ) { val_rapid = val_rapid + math_temp; if ( val_rapid > 10 ) val_rapid = 10; if ( val_rapid < 0 ) val_rapid = 0; SaveProfile(); }`);
+  if (has('rapidfire')) lines.push(`    if ( page_index == ${I.rapidfire} ) { val_fire = val_fire + math_temp; if ( val_fire > 10 ) val_fire = 10; if ( val_fire < 0 ) val_fire = 0; SaveProfile(); }`);
+  if (!lines.length) lines.push('    math_temp = 0;');
+  return `function ModifyValue() {\n${lines.join('\n')}\n}`;
+}
+
+// ---- init-Block: Standardwerte (erster Start) ----
+function buildInitDefaults(cfg, ctx) {
+  const p = cfg.pages;
+  const v = (id, key, fallback) => ctx.has(id) ? p[id][key] : fallback;
+  const t = (id, key) => ctx.has(id) ? p[id][key] : 0;
+  const f = id => ctx.hasFeat(id) ? (p.features.feats[id].def ? 1 : 0) : 0;
+  return `        tog_recoil = ${t('recoil', 'tog')}; tog_smart = ${t('smart', 'tog')}; tog_aim = ${t('aim', 'tog')};
+        tog_jump = ${t('roll', 'tog')}; tog_rapid = ${t('light', 'tog')};
+        tog_fire = ${t('rapidfire', 'tog')}; tog_ssh = ${t('snaphook', 'tog')}; ssh_trigger = ${v('snaphook', 'trigger', 'XB1_MENU')}; tog_dontshoot = ${t('dontshoot', 'tog')};
+        ds_delay = ${v('dontshoot', 'delay', 150)}; ds_hold = ${v('dontshoot', 'hold', 250)}; ds_trigger = ${v('dontshoot', 'trigger', 'XB1_X')};
+        tog_aim_fire = ${v('aim', 'fireOnly', 0)}; tog_rec_fire = ${v('recoil', 'adsOnly', 1)}; tog_smart_fire = ${v('smart', 'adsOnly', 1)};
+        rf_led_mode = ${v('rapidfire', 'led', 1)};
+        val_recoil = ${v('recoil', 'val', 8)}; val_aim = ${v('aim', 'val', 3)}; val_aa_speed = ${v('aim', 'speed', 3)}; val_jump = ${v('roll', 'val', 4)}; val_rapid = ${v('light', 'val', 7)};
+        val_fire = ${v('rapidfire', 'val', 6)};
+        smart_x = ${v('smart', 'x', 0)};
+        tog_autoping = ${f('autoping')}; tog_hairtrig = ${f('hairtrig')}; tog_easysprint = ${f('autorun')}; tog_norumble = ${f('norumble')}; tog_mfix = ${f('mfix')};
+        val_ping_cd = ${ctx.hasFeat('autoping') ? p.features.feats.autoping.cd : 0}; tog_gunswap = ${f('gunswap')}; ping_cd_timer = 6000;
+        tog_dropshot = ${v('dropjump', 'drop', 0)}; tog_jumpshot = ${v('dropjump', 'jump', 0)}; tog_dj_combo = ${v('dropjump', 'combo', 0)}; dj_idx = 0;
+        val_ds_spam = ${v('dropjump', 'dsSpam', 0)}; val_js_spam = ${v('dropjump', 'jsSpam', 0)};`;
+}
+
+// ---- Konfigurations-Hash (EEPROM-Erstinitialisierung) ----
+function configHash(cfg) {
+  const s = JSON.stringify([cfg.pages, cfg.ps5, cfg.screensaver]);
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  let out = (h % 32765) + 1;
+  if (out === 3191) out += 1; // nie mit dem Original-Marker kollidieren
+  return out;
+}
+
+// ---- Header-Kommentar ----
+function buildHeader(cfg, ctx, hash) {
+  const ver = cfg.version.join('.');
+  const docs = MODULES.filter(m => ctx.has(m.id))
+    .map(m => m.doc(ctx.I[m.id] + 1, ctx))
+    .join('\n *\n');
+  const today = new Date().toISOString().slice(0, 10);
+  return `/*
+ ==================================================================================
+ * SCRIPT:       ARC RAIDERS - DADA EDITION (CUSTOM BUILD)
+ * AUTHOR:       Dada
+ * PLATFORM:     Cronus Zen (GPC)
+ * VERSION:      v${ver} - erstellt mit dem DADA GPC BUILDER
+ * BUILD:        ${today} / Config-ID ${hash} / ${ctx.N} Seite${ctx.N === 1 ? '' : 'n'}
+ *
+ * --- SCRIPT MANUAL & DETAILED FEATURES ---
+ *
+${docs}
+ *
+ * --- HOW TO NAVIGATE & CONFIGURE ---
+ * - OPEN MENU: Hold LB/L1${ctx.hasFeat('flipped') ? ' (or LT/L2 if Flipped mode is ON)' : ''}. Release to save instantly!
+ * - SWITCH PAGES: Use D-Pad Left or Right.
+ * - TOGGLE MODS: Press A/Cross to turn the active Mod ON [V] or OFF [X].
+ * - ADJUST VALUES: Use D-Pad UP/DOWN (+/- 0.5 steps) or Right Stick (RX/RY).
+ *
+ * --- PROFILE SYSTEM (See Top-Left OLED for active Mode) ---
+ * -> Hold MENU BTN + Press PROFILE BTN (RB/R1) to cycle M-Modes.
+ * - M1 (1 Profile): Standard mode. Weapon swap works normally.
+ * - M2 (2 Profiles): Tap Y/Triangle to swap. Hold Y to holster (NO GUN).
+ * > Press D-Pad Left for Pickaxe (AXE). Tap Y to unholster without profile swap!
+ * - M5 (5 Profiles): Hold MENU BTN + tap Y/Triangle to cycle through 5 loadouts.
+ *
+ * SUPPORT / DISCORD:
+ * ${cfg.discord}
+ ==================================================================================
+*/`;
+}
+
+// ---- Hauptfunktion: komplettes Script erzeugen ----
+function generateGPC(cfg) {
+  // FEATURES-Seite ohne Features fällt automatisch weg
+  const featsSelected = FEATS.filter(f => cfg.pages.features.feats[f.id].on)
+    .filter(f => f.id !== 'gunswap' || cfg.pages.snaphook.on)
+    .map(f => f.id);
+  const pageOn = id => id === 'features'
+    ? (cfg.pages.features.on && featsSelected.length > 0)
+    : cfg.pages[id].on;
+
+  const sel = MODULES.filter(m => pageOn(m.id));
+  const I = {};
+  sel.forEach((m, k) => { I[m.id] = k; });
+  const ctx = {
+    I,
+    N: sel.length,
+    has: id => Object.prototype.hasOwnProperty.call(I, id),
+    feats: featsSelected,
+    hasFeat: id => Object.prototype.hasOwnProperty.call(I, 'features') && featsSelected.includes(id),
+    cfg,
+  };
+  const hash = configHash(cfg);
+  const producers = ctx.has('dropjump') || ctx.has('snaphook') || ctx.has('dontshoot');
+  const anyStick = ctx.has('aim') || ctx.has('recoil') || ctx.has('smart');
+
+  const out = [];
+  out.push(buildHeader(cfg, ctx, hash));
+  out.push('');
+  out.push(`define V_DIGIT_1 = ${cfg.version[0]};`);
+  out.push(`define V_DIGIT_2 = ${cfg.version[1]};`);
+  out.push(`define V_DIGIT_3 = ${cfg.version[2]};`);
+  out.push('');
+  out.push(`int FIRE_BTN;
+int ADS_BTN;
+int PING_BTN;
+int MENU_BTN;
+int PROF_BTN;
+
+define RX_AXIS       = XB1_RX;
+define RY_AXIS       = XB1_RY;
+define TOGGLE_BTN    = XB1_A;
+define SLIDE_BTN     = XB1_B;
+define RAPID_BTN     = XB1_RIGHT;
+define RESET_BTN     = XB1_RS;
+define SCREEN_W      = 128;
+define SCREEN_H      = 64;`);
+  out.push('');
+  if (ctx.has('aim')) out.push(GPC_TABLES);
+  out.push(GPC_VARS);
+
+  // --- init ---
+  out.push(`init {
+    if ( get_pvar( SPVAR_34, 0, 32767, 0 ) != ${hash} ) {
+        set_pvar( SPVAR_34, ${hash} );
+        profile_mode = 0; m2_prof = 1; m5_prof = 1; tog_ps5 = ${cfg.ps5 ? 1 : 0}; tog_flipped = ${ctx.hasFeat('flipped') && cfg.pages.features.feats.flipped.def ? 1 : 0};
+        SaveSystem();
+
+${buildInitDefaults(cfg, ctx)}
+
+        active_prof = 1; SaveToRAM(); SaveToEEPROM();
+        active_prof = 2; SaveToRAM(); SaveToEEPROM();
+        active_prof = 3; SaveToRAM(); SaveToEEPROM();
+        active_prof = 4; SaveToRAM(); SaveToEEPROM();
+        active_prof = 5; SaveToRAM(); SaveToEEPROM();
+        active_prof = 6; SaveToRAM(); SaveToEEPROM();
+        active_prof = 7; SaveToRAM(); SaveToEEPROM();
+        active_prof = 8; SaveToRAM(); SaveToEEPROM();
+
+        active_prof = 1;
+${GPC_INIT_LOAD}`);
+
+  // --- main ---
+  let main = `main {
+    FIRE_BTN = XB1_RT; ADS_BTN = XB1_LT; PING_BTN = XB1_RB; MENU_BTN = XB1_LB; PROF_BTN = XB1_RB;
+
+`;
+  if (ctx.hasFeat('flipped')) main += `    if ( tog_flipped ) {
+        flipped_tmp_rt = get_val( XB1_RT );
+        flipped_tmp_lt = get_val( XB1_LT );
+        set_val( XB1_RT, get_val( XB1_RB ) );
+        set_val( XB1_LT, get_val( XB1_LB ) );
+        set_val( XB1_RB, flipped_tmp_rt );
+        set_val( XB1_LB, flipped_tmp_lt );
+    }
+
+`;
+  if (ctx.hasFeat('norumble')) main += `    if ( tog_norumble ) {
+        if ( !combo_running(c_NotifyMode) && !combo_running(c_NotifyProfile) ) {
+            block_rumble();
+        }
+    }
+
+`;
+  main += GPC_BOOT_MAIN;
+  main += gpcMenuHold(ctx.hasFeat('mfix') ? '!tog_mfix && ' : '');
+  main += ` else {
+            edit_active = 0;
+            saver_timer = saver_timer + get_rtime();
+            fsh_edit_mode = 0; ds_time_edit_mode = 0; ds_btn_edit_mode = 0;
+
+${GPC_M2_Y_LOGIC}`;
+  if (ctx.has('smart')) main += `
+            if ( page_index == ${ctx.I.smart} ) {
+                safety_timer = safety_timer + get_rtime();
+                if ( safety_timer > 3500 ) { page_index = 0; safety_timer = 0; }
+            } else { safety_timer = 0; }
+`;
+  main += `        }
+
+        if ( edit_active ) {
+            show_display = 1;
+            if ( GetCurrentToggle() ) set_rgb( 0, 100, 0 ); else set_rgb( 100, 0, 0 );
+
+            set_val( XB1_UP, 0 ); set_val( XB1_DOWN, 0 );
+
+${FRAG.editZero(ctx)}
+            set_val( XB1_LEFT, 0 ); set_val( XB1_RIGHT, 0 );
+            set_val( SLIDE_BTN, 0 ); set_val( TOGGLE_BTN, 0 );
+
+            if ( !fsh_edit_mode && !ds_btn_edit_mode ) {
+                if ( event_press( XB1_RIGHT ) ) {
+                    page_index = page_index + 1;
+                    if ( page_index > ${ctx.N - 1} ) page_index = 0;
+                }
+                if ( event_press( XB1_LEFT ) ) {
+                    page_index = page_index - 1;
+                    if ( page_index < 0 ) page_index = ${ctx.N - 1};
+                }
+                if ( event_press( TOGGLE_BTN ) ) ToggleCurrentMod();
+            }
+
+${FRAG.editSubNav(ctx)}${FRAG.editHandlers(ctx)}
+        } else {
+            // GAMEPLAY
+            noise_counter = ( noise_counter + get_rtime() ) % 55;
+
+`;
+  if (producers) main += `            // Notification-Timer herunterzaehlen
+            if ( notify_timer > 0 ) {
+                notify_timer = notify_timer - get_rtime();
+                if ( notify_timer < 0 ) notify_timer = 0;
+            }
+
+            if ( notify_timer > 0 ) {
+                show_display = 3;   // Notification hat Vorrang
+            } else if ( profile_mode == 1 ) {
+`;
+  else main += `            if ( profile_mode == 1 ) {
+`;
+  main += `                show_display = 2;
+            } else {
+                ${cfg.screensaver ? 'if ( saver_timer < 2000 ) show_display = 1; else show_display = 0;' : 'show_display = 1;'}
+            }
+
+`;
+  const idleLed = cfg.screensaver
+    ? `                if ( show_display == 1 ) {
+                    led_brightness = 100 - ( saver_timer / 20 );
+                    if ( led_brightness < 0 ) led_brightness = 0;
+                    set_rgb( 0, 0, led_brightness );
+                } else { set_rgb( 0, 0, 0 ); }`
+    : `                if ( show_display == 1 ) { set_rgb( 0, 0, 100 ); } else { set_rgb( 0, 0, 0 ); }`;
+  if (ctx.has('rapidfire')) {
+    main += `            if ( show_display != 1 && tog_fire && rf_led_mode > 0 ) {
+                if ( rf_led_mode == 4 ) {
+                    rgb_timer = ( rgb_timer + get_rtime() ) % 1500;
+                    if ( rgb_timer < 500 ) { r = 100 - ( rgb_timer * 100 / 500 ); g = ( rgb_timer * 100 / 500 ); b = 0; }
+                    else if ( rgb_timer < 1000 ) { r = 0; g = 100 - ( ( rgb_timer - 500 ) * 100 / 500 ); b = ( ( rgb_timer - 500 ) * 100 / 500 ); }
+                    else { r = ( ( rgb_timer - 1000 ) * 100 / 500 ); g = 0; b = 100 - ( ( rgb_timer - 1000 ) * 100 / 500 ); }
+                    set_rgb( r, g, b );
+                } else {
+                    led_pulse_timer = ( led_pulse_timer + get_rtime() ) % 600;
+                    if ( led_pulse_timer < 300 ) { led_brightness = ( led_pulse_timer * 100 ) / 300; }
+                    else { led_brightness = ( ( 600 - led_pulse_timer ) * 100 ) / 300; }
+                    if ( rf_led_mode == 1 ) set_rgb( led_brightness, 0, 0 );
+                    if ( rf_led_mode == 2 ) set_rgb( 0, led_brightness, 0 );
+                    if ( rf_led_mode == 3 ) set_rgb( 0, 0, led_brightness );
+                }
+            } else {
+${idleLed}
+            }
+
+`;
+  } else {
+    main += `${idleLed.replace(/^ {16}/gm, '            ')}
+
+`;
+  }
+  main += FRAG.gameplay(ctx);
+  main += `        }
+
+        if ( show_display == 1 ) { combo_run( DrawFinalMenu ); }
+        else if ( show_display == 2 ) { combo_run( DrawGameplayStatus ); }
+`;
+  if (producers) main += `        else if ( show_display == 3 ) { combo_run( DrawNotify ); }
+`;
+  main += `        else { cls_oled( 0 ); }
+    }
+}`;
+  out.push(main);
+
+  // --- Funktionen ---
+  out.push('\n\n// ==================================================================================');
+  out.push('// --- FUNCTIONS ---');
+  out.push('// ==================================================================================\n');
+  out.push(buildGetCurrentVal(ctx));
+  out.push('');
+  out.push(buildGetCurrentToggle(ctx));
+  out.push('');
+  out.push(GPC_PERSIST);
+  out.push(buildToggleCurrentMod(ctx));
+  out.push('');
+  out.push(buildModifyValue(ctx));
+  out.push('');
+  out.push(GPC_DRAW_FUNCS);
+
+  // --- Combos ---
+  out.push(GPC_COMBO_NOTIFY_SYS);
+  out.push(FRAG.combos(ctx));
+  out.push(GPC_COMBO_GAMEPLAY_STATUS);
+  if (producers) out.push(GPC_COMBO_DRAW_NOTIFY);
+  out.push(GPC_COMBO_BOOT);
+  out.push(buildDrawFinalMenu(ctx));
+  out.push('');
+
+  return out.join('\n').replace(/\n{4,}/g, '\n\n\n');
+}
+
+// ============================================================================
+// UI: Konfiguration, Karten, Validierung, Vorschau, Download, Presets
+// ============================================================================
+
+const LS_KEY = 'dadaGpcBuilderCfg_v1';
+
+function defaultCfg() {
+  return {
+    version: [4, 0, 0],
+    discord: 'discord.gg/W825gUj6Nn',
+    screensaver: true,
+    ps5: 0,
+    pages: {
+      recoil:    { on: true, tog: 1, val: 8, adsOnly: 1 },
+      smart:     { on: true, tog: 0, x: 0, adsOnly: 1 },
+      aim:       { on: true, tog: 1, val: 3, speed: 3, fireOnly: 0 },
+      roll:      { on: true, tog: 1, val: 4 },
+      light:     { on: true, tog: 1, val: 7 },
+      rapidfire: { on: true, tog: 0, val: 6, led: 1 },
+      snaphook:  { on: true, tog: 1, trigger: 'XB1_MENU' },
+      dontshoot: { on: true, tog: 0, trigger: 'XB1_X', delay: 150, hold: 250 },
+      features:  { on: true, feats: {
+        autoping: { on: true, def: 0, cd: 0 },
+        hairtrig: { on: true, def: 1 },
+        autorun:  { on: true, def: 0 },
+        flipped:  { on: true, def: 0 },
+        norumble: { on: true, def: 0 },
+        mfix:     { on: true, def: 1 },
+        gunswap:  { on: true, def: 0 },
+      } },
+      dropjump:  { on: true, drop: 0, jump: 0, combo: 0, dsSpam: 0, jsSpam: 0 },
+    },
+  };
+}
+
+let cfg = loadCfg();
+
+function loadCfg() {
+  const base = defaultCfg();
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) mergeCfg(base, JSON.parse(raw));
+  } catch (e) { /* defekter Speicher → Defaults */ }
+  return base;
+}
+function mergeCfg(base, saved) {
+  if (!saved || typeof saved !== 'object') return;
+  if (Array.isArray(saved.version) && saved.version.length === 3) base.version = saved.version.map(d => Math.min(9, Math.max(0, parseInt(d, 10) || 0)));
+  if (typeof saved.discord === 'string') base.discord = saved.discord;
+  if (typeof saved.screensaver === 'boolean') base.screensaver = saved.screensaver;
+  if (saved.ps5 === 0 || saved.ps5 === 1) base.ps5 = saved.ps5;
+  if (saved.pages && typeof saved.pages === 'object') {
+    for (const id of Object.keys(base.pages)) {
+      const s = saved.pages[id];
+      if (!s || typeof s !== 'object') continue;
+      if (id === 'features') {
+        if (typeof s.on === 'boolean') base.pages.features.on = s.on;
+        if (s.feats) for (const fid of Object.keys(base.pages.features.feats)) {
+          const sf = s.feats[fid];
+          if (sf && typeof sf === 'object') Object.assign(base.pages.features.feats[fid], sf);
+        }
+      } else {
+        Object.assign(base.pages[id], s);
+      }
+    }
+  }
+}
+function saveCfg() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) { /* voll/blockiert → ignorieren */ }
+}
+
+// ---- Feld-Definitionen pro Seiten-Karte ----
+const halfFmt = v => (v / 2).toFixed(1).replace('.', ',');
+const CARD_FIELDS = {
+  recoil: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'val', type: 'range', min: -20, max: 20, label: 'Stärke (−10,0 … +10,0)', fmt: halfFmt },
+    { key: 'adsOnly', type: 'switch', label: 'Nur bei ADS + Feuer' },
+  ],
+  smart: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'x', type: 'range', min: -20, max: 20, label: 'X-Achse (−10,0 … +10,0)', fmt: halfFmt },
+    { key: 'adsOnly', type: 'switch', label: 'Nur bei ADS + Feuer' },
+  ],
+  aim: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'val', type: 'range', min: 0, max: 10, label: 'Stärke (0–10)' },
+    { key: 'speed', type: 'range', min: 1, max: 10, label: 'Rotations-Geschwindigkeit (1–10)' },
+    { key: 'fireOnly', type: 'switch', label: 'Nur bei Feuer (zusätzlich zu ADS)' },
+  ],
+  roll: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'val', type: 'range', min: 0, max: 10, label: 'Roll-Geschwindigkeit (0–10)' },
+  ],
+  light: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'val', type: 'range', min: 0, max: 10, label: 'Blink-Geschwindigkeit (0–10)' },
+  ],
+  rapidfire: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'val', type: 'range', min: 0, max: 10, label: 'Feuerrate (0–10)' },
+    { key: 'led', type: 'select', label: 'LED beim Schießen', options: [[0, 'Aus'], [1, 'Rot pulsierend'], [2, 'Grün pulsierend'], [3, 'Blau pulsierend'], [4, 'RGB-Regenbogen']] },
+  ],
+  snaphook: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'trigger', type: 'select', label: 'Auslöse-Taste (mit ADS)', options: TRIGGER_BTNS },
+  ],
+  dontshoot: [
+    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
+    { key: 'trigger', type: 'select', label: 'Auslöse-Taste (halten)', options: TRIGGER_BTNS },
+    { key: 'delay', type: 'range', min: 50, max: 500, step: 50, label: 'Delay (ms)' },
+    { key: 'hold', type: 'range', min: 50, max: 500, step: 50, label: 'Hold (ms)' },
+  ],
+  dropjump: [
+    { key: 'drop', type: 'switch', label: 'Drop-Shot beim ersten Start aktiv' },
+    { key: 'dsSpam', type: 'range', min: 0, max: 5, label: 'Drop-Spam (0 = aus)', fmt: v => v === 0 ? 'Aus' : String(v) },
+    { key: 'jump', type: 'switch', label: 'Jump-Shot beim ersten Start aktiv' },
+    { key: 'jsSpam', type: 'range', min: 0, max: 5, label: 'Jump-Spam (0 = aus)', fmt: v => v === 0 ? 'Aus' : String(v) },
+    { key: 'combo', type: 'switch', label: 'Combo-Toggle (L2 + D-Pad) beim Start aktiv' },
+  ],
+};
+
+// ---- DOM-Helfer ----
+function el(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+function mkSwitch(checked, onChange, disabled) {
+  const w = el(`<label class="switch"><input type="checkbox"${checked ? ' checked' : ''}${disabled ? ' disabled' : ''}><span class="knob"></span></label>`);
+  w.querySelector('input').addEventListener('change', e => onChange(e.target.checked));
+  return w;
+}
+
+// ---- Seiten-Karten rendern ----
+const cardEls = {};
+function renderCards() {
+  const wrap = document.getElementById('pages');
+  wrap.innerHTML = '';
+  for (const m of MODULES) {
+    const p = cfg.pages[m.id];
+    const card = el(`<div class="card"><div class="head">
+        <label class="switch"><input type="checkbox" data-role="pageon"${p.on ? ' checked' : ''}><span class="knob"></span></label>
+        <span class="num" data-role="num">–</span>
+        <span class="title">${m.name}<small>${m.tag}</small></span>
+      </div><div class="body"></div></div>`);
+    const body = card.querySelector('.body');
+    card.querySelector('[data-role=pageon]').addEventListener('change', e => {
+      p.on = e.target.checked;
+      onChange();
+    });
+    if (m.id === 'features') renderFeatureBody(body);
+    else renderFieldBody(body, m.id);
+    wrap.appendChild(card);
+    cardEls[m.id] = card;
+  }
+}
+
+function renderFieldBody(body, id) {
+  const p = cfg.pages[id];
+  for (const f of CARD_FIELDS[id]) {
+    if (f.type === 'switch') {
+      const row = el(`<div class="row"><label>${f.label}</label></div>`);
+      row.appendChild(mkSwitch(!!p[f.key], v => {
+        p[f.key] = v ? 1 : 0;
+        applyExclusions(id, f.key);
+        if (id === 'recoil' && f.key === 'tog') refreshBody('smart');
+        if (id === 'smart' && f.key === 'tog') refreshBody('recoil');
+        if (id === 'dropjump' && (f.key === 'drop' || f.key === 'jump')) refreshBody('dropjump');
+        onChange();
+      }));
+      body.appendChild(row);
+    } else if (f.type === 'range') {
+      const fmt = f.fmt || String;
+      const row = el(`<div class="row"><label>${f.label}</label>
+        <input type="range" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${p[f.key]}">
+        <span class="val">${fmt(p[f.key])}</span></div>`);
+      const inp = row.querySelector('input');
+      inp.addEventListener('input', () => {
+        p[f.key] = parseInt(inp.value, 10);
+        row.querySelector('.val').textContent = fmt(p[f.key]);
+        onChange();
+      });
+      body.appendChild(row);
+    } else if (f.type === 'select') {
+      const opts = f.options.map(([v, l]) => `<option value="${v}"${String(p[f.key]) === String(v) ? ' selected' : ''}>${l}</option>`).join('');
+      const row = el(`<div class="row"><label>${f.label}</label><select>${opts}</select></div>`);
+      row.querySelector('select').addEventListener('change', e => {
+        const raw = e.target.value;
+        p[f.key] = /^\d+$/.test(raw) ? parseInt(raw, 10) : raw;
+        onChange();
+      });
+      body.appendChild(row);
+    }
+  }
+}
+
+function renderFeatureBody(body) {
+  const feats = cfg.pages.features.feats;
+  body.appendChild(el(`<div class="hint">Nur angehakte Features landen im Untermenü. „Standard" = Zustand beim ersten Start.</div>`));
+  for (const F of FEATS) {
+    const fc = feats[F.id];
+    const row = el(`<div class="featrow" data-feat="${F.id}">
+        <label class="switch"><input type="checkbox" data-role="on"${fc.on ? ' checked' : ''}><span class="knob"></span></label>
+        <span class="fname">${F.name}<small>${F.tag}</small></span>
+      </div>`);
+    row.querySelector('[data-role=on]').addEventListener('change', e => {
+      fc.on = e.target.checked;
+      onChange();
+    });
+    const defWrap = el(`<span class="deflabel">Standard</span>`);
+    row.appendChild(defWrap);
+    row.appendChild(mkSwitch(!!fc.def, v => { fc.def = v ? 1 : 0; onChange(); }));
+    if (F.id === 'autoping') {
+      const sel = el(`<select title="Ping-Cooldown">${[0, 1, 2, 3, 4, 5].map(v => `<option value="${v}"${fc.cd === v ? ' selected' : ''}>${v === 0 ? 'CD: Aus' : 'CD: ' + v + ' s'}</option>`).join('')}</select>`);
+      sel.addEventListener('change', e => { fc.cd = parseInt(e.target.value, 10); onChange(); });
+      row.appendChild(sel);
+    }
+    body.appendChild(row);
+  }
+}
+
+function refreshBody(id) {
+  const body = cardEls[id].querySelector('.body');
+  body.innerHTML = '';
+  if (id === 'features') renderFeatureBody(body);
+  else renderFieldBody(body, id);
+}
+
+// Gegenseitiger Ausschluss von Standard-Toggles
+function applyExclusions(id, key) {
+  const p = cfg.pages;
+  if (id === 'recoil' && key === 'tog' && p.recoil.tog) p.smart.tog = 0;
+  if (id === 'smart' && key === 'tog' && p.smart.tog) p.recoil.tog = 0;
+  if (id === 'dropjump' && key === 'drop' && p.dropjump.drop) p.dropjump.jump = 0;
+  if (id === 'dropjump' && key === 'jump' && p.dropjump.jump) p.dropjump.drop = 0;
+}
+
+// ---- Effektive Seitenliste (wie im Generator) ----
+function effectivePages() {
+  const featsOn = FEATS.filter(f => cfg.pages.features.feats[f.id].on)
+    .filter(f => f.id !== 'gunswap' || cfg.pages.snaphook.on);
+  return MODULES.filter(m => m.id === 'features'
+    ? (cfg.pages.features.on && featsOn.length > 0)
+    : cfg.pages[m.id].on);
+}
+
+// ---- Validierung / Hinweise ----
+function validate() {
+  const warns = [];
+  const p = cfg.pages;
+  const sel = effectivePages();
+  if (sel.length === 0) warns.push('Keine Seite ausgewählt – es kann kein Script erzeugt werden.');
+  const featsOn = FEATS.filter(f => p.features.feats[f.id].on);
+  if (p.features.on && featsOn.length === 0) warns.push('FEATURES-Seite ist an, aber kein Feature gewählt – die Seite wird automatisch weggelassen.');
+  if (p.features.feats.gunswap.on && !p.snaphook.on) warns.push('GUN-SWAP braucht die SNAP-HOOK-Seite – das Feature wird ohne sie weggelassen.');
+  if (p.smart.on && !p.recoil.on) warns.push('Hinweis: SMART RECOIL ohne STD RECOIL – der Y-Wert wird dann nur über die Smart-Seite (rechter Stick) eingestellt.');
+  if (p.features.on && p.features.feats.flipped.on && p.features.feats.flipped.def) warns.push('FLIPPED ist als Standard AN – das Menü öffnet dann mit LT/L2 statt LB/L1!');
+  if (!cfg.screensaver) warns.push('Hinweis: Ohne Bildschirmschoner bleibt das OLED dauerhaft an (Einbrenn-Risiko bei sehr langen Sessions).');
+  return warns;
+}
+
+// ---- Anzeige aktualisieren ----
+let previewTimer = null;
+function onChange() {
+  saveCfg();
+  updateCards();
+  updateWarnings();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 150);
+}
+
+function updateCards() {
+  const sel = effectivePages();
+  const nums = {};
+  sel.forEach((m, k) => { nums[m.id] = k + 1; });
+  for (const m of MODULES) {
+    const card = cardEls[m.id];
+    const on = !!nums[m.id];
+    card.classList.toggle('on', on);
+    card.classList.toggle('off', !on);
+    card.querySelector('[data-role=num]').textContent = on ? 'S. ' + nums[m.id] : '—';
+    const pageChk = card.querySelector('[data-role=pageon]');
+    if (m.id === 'features') pageChk.checked = cfg.pages.features.on;
+  }
+  // Gun-Swap-Zeile ausgrauen, wenn Snap Hook fehlt
+  const gsRow = cardEls.features.querySelector('[data-feat=gunswap]');
+  gsRow.classList.toggle('disabled', !cfg.pages.snaphook.on);
+  document.getElementById('pageCount').innerHTML = `<b>${sel.length}</b> von ${MODULES.length} Seiten im Script`;
+  document.getElementById('footerDiscord').textContent = cfg.discord;
+}
+
+function updateWarnings() {
+  const warns = validate();
+  const panel = document.getElementById('warnPanel');
+  const box = document.getElementById('warnings');
+  panel.style.display = warns.length ? '' : 'none';
+  box.innerHTML = '';
+  for (const w of warns) box.appendChild(el(`<div class="w">⚠ ${w}</div>`));
+  document.getElementById('download').disabled = effectivePages().length === 0;
+}
+
+function updatePreview() {
+  const stats = document.getElementById('previewStats');
+  const ta = document.getElementById('preview');
+  if (effectivePages().length === 0) {
+    stats.textContent = 'Keine Seiten gewählt.';
+    ta.value = '';
+    return;
+  }
+  try {
+    const code = generateGPC(cfg);
+    const bytes = new Blob([code]).size;
+    stats.textContent = `${code.split('\n').length} Zeilen · ${(bytes / 1024).toFixed(1)} kB · Config-ID ${configHash(cfg)}`;
+    ta.value = code;
+  } catch (err) {
+    stats.textContent = 'Fehler bei der Generierung: ' + err.message;
+    ta.value = String(err.stack || err);
+  }
+}
+
+// ---- Globale Felder ----
+function wireGlobals() {
+  // on*-Zuweisungen statt addEventListener: bleibt bei rebuildUI() idempotent
+  for (let i = 0; i < 3; i++) {
+    const inp = document.getElementById('ver' + (i + 1));
+    inp.value = cfg.version[i];
+    inp.oninput = () => {
+      const d = inp.value.replace(/\D/g, '').slice(-1);
+      inp.value = d;
+      cfg.version[i] = d === '' ? 0 : parseInt(d, 10);
+      onChange();
+    };
+  }
+  const ps5 = document.getElementById('ps5');
+  ps5.value = String(cfg.ps5);
+  ps5.onchange = () => { cfg.ps5 = parseInt(ps5.value, 10); onChange(); };
+  const saver = document.getElementById('screensaver');
+  saver.checked = cfg.screensaver;
+  saver.onchange = () => { cfg.screensaver = saver.checked; onChange(); };
+  const dc = document.getElementById('discord');
+  dc.value = cfg.discord;
+  dc.oninput = () => { cfg.discord = dc.value; onChange(); };
+}
+
+// ---- Aktionen ----
+function downloadBlob(name, text, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function wireActions() {
+  document.getElementById('download').addEventListener('click', () => {
+    if (effectivePages().length === 0) return;
+    const code = generateGPC(cfg);
+    const v = cfg.version.join('');
+    downloadBlob(`DADA_RAW_CUSTOM_v${v}_${configHash(cfg)}.gpc`, code, 'text/plain');
+  });
+  document.getElementById('exportPreset').addEventListener('click', () => {
+    downloadBlob('dada-gpc-preset.json', JSON.stringify(cfg, null, 2), 'application/json');
+  });
+  const fileInp = document.getElementById('importFile');
+  document.getElementById('importPreset').addEventListener('click', () => fileInp.click());
+  fileInp.addEventListener('change', () => {
+    const file = fileInp.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const base = defaultCfg();
+        mergeCfg(base, JSON.parse(reader.result));
+        cfg = base;
+        saveCfg();
+        rebuildUI();
+      } catch (e) {
+        alert('Preset konnte nicht gelesen werden: ' + e.message);
+      }
+      fileInp.value = '';
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById('resetCfg').addEventListener('click', () => {
+    if (!confirm('Alle Einstellungen auf die RAW-40.0-Standardwerte zurücksetzen?')) return;
+    cfg = defaultCfg();
+    saveCfg();
+    rebuildUI();
+  });
+  const tp = document.getElementById('togglePreview');
+  tp.addEventListener('click', () => {
+    const ta = document.getElementById('preview');
+    const show = ta.style.display === 'none';
+    ta.style.display = show ? '' : 'none';
+    tp.textContent = show ? 'verbergen' : 'anzeigen';
+  });
+}
+
+function rebuildUI() {
+  renderCards();
+  wireGlobals();
+  onChange();
+}
+
+// ---- Start ----
+renderCards();
+wireGlobals();
+wireActions();
+onChange();
+updatePreview();
+</script>
+</body>
+</html>
