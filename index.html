@@ -68,20 +68,69 @@ select {
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
   color: var(--text); padding: 5px 8px; font-size: .88rem;
 }
-/* Toggle-Switch */
-.switch { position: relative; display: inline-block; width: 40px; height: 22px; flex: none; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.switch .knob {
-  position: absolute; cursor: pointer; inset: 0; background: #39424f;
-  border-radius: 22px; transition: .15s;
-}
-.switch .knob:before {
-  content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px;
-  background: #cfd8e3; border-radius: 50%; transition: .15s;
-}
-.switch input:checked + .knob { background: var(--ok); }
-.switch input:checked + .knob:before { transform: translateX(18px); }
-.switch input:disabled + .knob { opacity: .35; cursor: not-allowed; }
+/* Toggle-Switch (robust, feste Größe, kein Strecken) */
+.switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 42px; height: 24px; vertical-align: middle; }
+.switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.switch .knob { pointer-events: none; position: absolute; inset: 0; background: #39424f; border-radius: 999px; transition: .15s; }
+.switch .knob::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #e8edf3; border-radius: 50%; transition: .15s; }
+.switch input:checked + .knob::before { transform: translateX(18px); }
+.switch input:disabled { cursor: not-allowed; }
+.switch input:disabled + .knob { opacity: .35; }
+/* Varianten: Master = orange (Seite ins Script), Preset = grün (Startzustand) */
+.switch--master input:checked + .knob { background: var(--accent); }
+.switch--preset input:checked + .knob { background: var(--ok); }
+[dir=rtl] .switch input:checked + .knob::before { transform: translateX(-18px); }
+/* Status-Text neben Schaltern */
+.statetxt { font-size: .72rem; font-weight: 700; letter-spacing: .5px; min-width: 34px; }
+.statetxt.is-on { color: var(--ok); }
+.statetxt.is-off { color: var(--dim); }
+.switch--master ~ .statetxt.is-on, .masterwrap .statetxt.is-on { color: var(--accent); }
+
+/* Kopfleiste rechts: Info + Sprache */
+.hdrbar { position: absolute; top: 16px; inset-inline-end: 24px; display: flex; gap: 10px; align-items: center; }
+.hdrbar .globe { font-size: 1.15rem; }
+#langSel { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: 6px 8px; font-size: .9rem; cursor: pointer; }
+#infoBtn { background: var(--bg3); border: 1px solid var(--accent2); color: var(--accent2); border-radius: 7px; padding: 6px 16px; font-size: .9rem; cursor: pointer; }
+#infoBtn:hover { background: rgba(41,182,246,.12); }
+
+/* Legende über den Karten */
+.legend { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+.legend-title { font-size: .85rem; color: var(--dim); margin-bottom: 8px; }
+.legend-item { font-size: .84rem; display: flex; align-items: center; gap: 9px; margin: 4px 0; }
+.chip { flex: none; width: 30px; height: 16px; border-radius: 999px; }
+.chip-master { background: var(--accent); }
+.chip-preset { background: var(--ok); }
+
+/* Info-Modal */
+#infoModal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+#infoModal .backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.65); }
+#infoModal .panel { position: relative; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; width: min(780px, 92vw); max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.5); margin: 0; }
+#infoModal .mhead { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+#infoModal .mhead h2 { color: var(--accent); font-size: 1.2rem; letter-spacing: 1px; margin: 0; }
+#infoClose { background: transparent; border: 1px solid var(--border); color: var(--dim); border-radius: 7px; padding: 4px 12px; font-size: 1rem; cursor: pointer; }
+#infoClose:hover { color: var(--text); border-color: var(--dim); }
+#infoModal .mbody { padding: 16px 22px 22px; overflow-y: auto; }
+#infoModal .mbody h3 { color: var(--accent2); font-size: .95rem; text-transform: uppercase; letter-spacing: 1.2px; margin: 18px 0 8px; }
+#infoModal .mbody > p { color: var(--text); font-size: .92rem; margin-bottom: 6px; }
+#infoModal .mbody .info-intro { color: var(--dim); font-style: italic; }
+.info-page { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; margin-bottom: 8px; }
+.info-page b { color: var(--accent); font-size: .9rem; letter-spacing: .5px; }
+.info-page p { margin: 3px 0 0; color: var(--dim); font-size: .87rem; }
+
+/* Karten-Kopf: Master-Wrap + Verschiebe-Buttons */
+.masterwrap { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.masterwrap .mlabel { font-size: .68rem; font-weight: 700; letter-spacing: .8px; color: var(--dim); text-transform: uppercase; }
+.movebtns { display: inline-flex; gap: 4px; flex: none; }
+.movebtns button { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 26px; height: 24px; font-size: .8rem; line-height: 1; cursor: pointer; padding: 0; }
+.movebtns button:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
+.movebtns button:disabled { opacity: .3; cursor: default; }
+
+/* Preset-Zeile + Auto-Ping-Extra */
+.row-sw .swwrap { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.featextra { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin: 2px 0 6px; display: flex; flex-direction: column; gap: 8px; }
+.featextra .hint { margin: 0; }
+input.numin { width: 70px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 5px 8px; font-size: .9rem; }
+
 /* Seiten-Karten */
 #pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
 .card {
@@ -158,28 +207,30 @@ a { color: var(--accent2); }
 <body>
 
 <header>
-  <h1>DADA <span>GPC BUILDER</span></h1>
-  <p class="sub">Stell dir dein persönliches ARC RAIDERS Script (RAW-Edition) zusammen – Seiten wählen, Standardwerte setzen, fertige .gpc-Datei herunterladen.</p>
-  <div class="steps">
-    <div><b>1</b> Seiten &amp; Features auswählen</div>
-    <div><b>2</b> Standardwerte einstellen</div>
-    <div><b>3</b> .gpc herunterladen</div>
-    <div><b>4</b> In Zen Studio kompilieren &amp; flashen</div>
+  <div class="hdrbar">
+    <button id="infoBtn"></button>
+    <span class="globe" title="Language / Sprache">🌐</span>
+    <select id="langSel">
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+      <option value="pt">Português</option>
+      <option value="es">Español</option>
+      <option value="ru">Русский</option>
+      <option value="tr">Türkçe</option>
+      <option value="ar">العربية</option>
+    </select>
   </div>
+  <h1>DADA <span>GPC BUILDER</span></h1>
+  <p class="sub" id="hSub"></p>
+  <div class="steps" id="steps"></div>
 </header>
 
 <main>
   <section class="panel">
-    <h2>Globale Einstellungen</h2>
+    <h2 id="hGlobals"></h2>
     <div class="globals">
       <div class="field">
-        <label>Version</label>
-        <input type="text" class="ver" id="ver1" maxlength="1" value="4">
-        <input type="text" class="ver" id="ver2" maxlength="1" value="0">
-        <input type="text" class="ver" id="ver3" maxlength="1" value="0">
-      </div>
-      <div class="field">
-        <label for="ps5">Plattform-Symbole</label>
+        <label for="ps5" id="lblPlatform"></label>
         <select id="ps5">
           <option value="0">XBOX</option>
           <option value="1">PS5</option>
@@ -187,24 +238,22 @@ a { color: var(--accent2); }
       </div>
       <div class="field">
         <label class="switch"><input type="checkbox" id="screensaver" checked><span class="knob"></span></label>
-        <label for="screensaver">Bildschirmschoner (OLED nach 2&nbsp;Sek. aus)</label>
-      </div>
-      <div class="field">
-        <label>Discord-Link</label>
-        <input type="text" class="wide" id="discord" value="discord.gg/W825gUj6Nn">
+        <label for="screensaver" id="lblSaver"></label>
       </div>
     </div>
   </section>
 
+  <div class="legend" id="legend"></div>
+
   <section class="panel" id="warnPanel" style="display:none">
-    <h2>Hinweise</h2>
+    <h2 id="warnHead"></h2>
     <div id="warnings"></div>
   </section>
 
   <div id="pages"></div>
 
   <section class="panel" id="previewWrap" style="margin-top:18px">
-    <h2>Script-Vorschau <button class="ghost small" id="togglePreview" style="margin-left:10px">anzeigen</button></h2>
+    <h2><span id="prevHeadTxt"></span> <button class="ghost small" id="togglePreview" style="margin-left:10px"></button></h2>
     <div id="previewStats"></div>
     <textarea id="preview" readonly spellcheck="false" style="display:none"></textarea>
   </section>
@@ -212,14 +261,25 @@ a { color: var(--accent2); }
 
 <div id="actionbar">
   <span id="pageCount"></span>
-  <button class="primary" id="download">&#128190; GPC herunterladen</button>
-  <button class="ghost" id="exportPreset">Preset exportieren</button>
-  <button class="ghost" id="importPreset">Preset importieren</button>
-  <button class="ghost" id="resetCfg">Zurücksetzen</button>
+  <button class="primary" id="download"></button>
+  <button class="ghost" id="exportPreset"></button>
+  <button class="ghost" id="importPreset"></button>
+  <button class="ghost" id="resetCfg"></button>
   <input type="file" id="importFile" accept=".json" style="display:none">
 </div>
 
-<footer>DADA GPC BUILDER · basiert auf RAW 40.0 · Support: <span id="footerDiscord">discord.gg/W825gUj6Nn</span></footer>
+<footer>DADA GPC BUILDER · <span id="footerBase"></span> <span id="footerDiscord">discord.gg/W825gUj6Nn</span></footer>
+
+<div id="infoModal" style="display:none">
+  <div class="backdrop" id="infoBackdrop"></div>
+  <div class="panel">
+    <div class="mhead">
+      <h2 id="infoTitle"></h2>
+      <button id="infoClose">✕</button>
+    </div>
+    <div class="mbody" id="infoBody"></div>
+  </div>
+</div>
 
 <script>
 "use strict";
@@ -749,23 +809,9 @@ const FEATS = [
   { id: 'gunswap',  name: 'GUN-SWAP',  tag: 'Macht aus SNAP HOOK die Gun-Swap-Waffentasche (braucht die SNAP-HOOK-Seite)' },
 ];
 
-// Tasten für die Trigger-Dropdowns (Remap-fähige Tasten wie im Original)
-const TRIGGER_BTNS = [
-  ['XB1_UP',    'D-Pad Hoch'],
-  ['XB1_DOWN',  'D-Pad Runter'],
-  ['XB1_LEFT',  'D-Pad Links'],
-  ['XB1_RIGHT', 'D-Pad Rechts'],
-  ['XB1_A',     'A / Kreuz'],
-  ['XB1_B',     'B / Kreis'],
-  ['XB1_X',     'X / Viereck'],
-  ['XB1_Y',     'Y / Dreieck'],
-  ['XB1_LB',    'LB / L1'],
-  ['XB1_RB',    'RB / R1'],
-  ['XB1_LS',    'LS / L3'],
-  ['XB1_RS',    'RS / R3'],
-  ['XB1_VIEW',  'View / Touchpad'],
-  ['XB1_MENU',  'Menü / Options'],
-];
+// Tasten für die Trigger-Dropdowns (Remap-fähige Tasten wie im Original).
+// Labels sprachabhängig über t('btn.<id>').
+const TRIGGER_BTNS = ['XB1_UP', 'XB1_DOWN', 'XB1_LEFT', 'XB1_RIGHT', 'XB1_A', 'XB1_B', 'XB1_X', 'XB1_Y', 'XB1_LB', 'XB1_RB', 'XB1_LS', 'XB1_RS', 'XB1_VIEW', 'XB1_MENU'];
 
 // ---------------------------------------------------------------------------
 // Fragment-Bausteine. ctx = { I, has, hasFeat, feats, cfg, N }
@@ -983,7 +1029,11 @@ FRAG.gameplay = ctx => {
             }
 
 `;
-  if (ctx.hasFeat('autoping')) s += `            if ( tog_autoping ) {
+  if (ctx.hasFeat('autoping')) {
+    const cdMax = ctx.cfg.pages.features.feats.autoping.cdMax || 5;
+    if (cdMax === 5) {
+      // Original 1:1 (Stufe k = k Sekunden, Cap 6000).
+      s += `            if ( tog_autoping ) {
                 ping_cd_timer = ping_cd_timer + get_rtime();
                 if ( ping_cd_timer > 6000 ) ping_cd_timer = 6000;
                 if ( get_val( ADS_BTN ) && get_val( FIRE_BTN ) ) {
@@ -999,6 +1049,28 @@ FRAG.gameplay = ctx => {
             }
 
 `;
+    } else {
+      // Eigener Max-Wert: Stufe k = k * cdMax/5 Sekunden. PING_CD_STEP = ms pro Stufe.
+      const step = Math.round(cdMax * 200);   // = (cdMax/5) * 1000 ms
+      const cap = cdMax * 1000;               // Cap muss den groessten Cooldown zulassen
+      s += `            if ( tog_autoping ) {
+                ping_cd_timer = ping_cd_timer + get_rtime();
+                if ( ping_cd_timer > ${cap} ) ping_cd_timer = ${cap};
+                if ( get_val( ADS_BTN ) && get_val( FIRE_BTN ) ) {
+                    if ( val_ping_cd == 0 ) {
+                        combo_run( c_AutoPing );
+                    } else if ( ping_cd_timer >= val_ping_cd * PING_CD_STEP ) {
+                        combo_run( c_AutoPing );
+                        ping_cd_timer = 0;
+                    }
+                } else {
+                    combo_stop( c_AutoPing );
+                }
+            }
+
+`;
+    }
+  }
   if (ctx.has('dontshoot')) s += `            if ( tog_dontshoot ) {
                 if ( get_val( ds_trigger ) ) {
                     if ( get_ptime( ds_trigger ) >= ds_delay ) {
@@ -1869,6 +1941,18 @@ function buildInitDefaults(cfg, ctx) {
         val_ds_spam = ${v('dropjump', 'dsSpam', 0)}; val_js_spam = ${v('dropjump', 'jsSpam', 0)};`;
 }
 
+// ---- Seiten in der vom Nutzer gewählten Reihenfolge (cfg.order) ----
+function orderedModules(cfg) {
+  const order = Array.isArray(cfg.order) ? cfg.order : [];
+  const byId = {};
+  for (const m of MODULES) byId[m.id] = m;
+  const out = [];
+  const seen = {};
+  for (const id of order) { if (byId[id] && !seen[id]) { out.push(byId[id]); seen[id] = 1; } }
+  for (const m of MODULES) if (!seen[m.id]) out.push(m); // fehlende IDs kanonisch anhängen
+  return out;
+}
+
 // ---- Konfigurations-Hash (EEPROM-Erstinitialisierung) ----
 function configHash(cfg) {
   const s = JSON.stringify([cfg.pages, cfg.ps5, cfg.screensaver]);
@@ -1883,6 +1967,7 @@ function configHash(cfg) {
 function buildHeader(cfg, ctx, hash) {
   const ver = cfg.version.join('.');
   const docs = MODULES.filter(m => ctx.has(m.id))
+    .sort((a, b) => ctx.I[a.id] - ctx.I[b.id])
     .map(m => m.doc(ctx.I[m.id] + 1, ctx))
     .join('\n *\n');
   const today = new Date().toISOString().slice(0, 10);
@@ -1927,7 +2012,7 @@ function generateGPC(cfg) {
     ? (cfg.pages.features.on && featsSelected.length > 0)
     : cfg.pages[id].on;
 
-  const sel = MODULES.filter(m => pageOn(m.id));
+  const sel = orderedModules(cfg).filter(m => pageOn(m.id));
   const I = {};
   sel.forEach((m, k) => { I[m.id] = k; });
   const ctx = {
@@ -1963,6 +2048,10 @@ define RAPID_BTN     = XB1_RIGHT;
 define RESET_BTN     = XB1_RS;
 define SCREEN_W      = 128;
 define SCREEN_H      = 64;`);
+  // Auto-Ping mit eigenem Max-Wert: Millisekunden pro Cooldown-Stufe.
+  if (ctx.hasFeat('autoping') && (cfg.pages.features.feats.autoping.cdMax || 5) !== 5) {
+    out.push(`define PING_CD_STEP  = ${Math.round((cfg.pages.features.feats.autoping.cdMax || 5) * 200)};`);
+  }
   out.push('');
   if (ctx.has('aim')) out.push(GPC_TABLES);
   out.push(GPC_VARS);
@@ -2149,12 +2238,493 @@ ${idleLed}
 // UI: Konfiguration, Karten, Validierung, Vorschau, Download, Presets
 // ============================================================================
 
-const LS_KEY = 'dadaGpcBuilderCfg_v1';
+// ---- Übersetzungen (nur die Builder-App; das erzeugte Script bleibt englisch) ----
+const I18N = {
+  en: {
+    "app.sub": "Build your personal ARC RAIDERS script (RAW edition) — pick pages, set defaults, download a ready-to-use .gpc file.",
+    "steps.1": "Select pages & features", "steps.2": "Set default values", "steps.3": "Download .gpc", "steps.4": "Compile & flash in Zen Studio",
+    "globals.h": "Global settings", "globals.platform": "Button symbols", "globals.saver": "Screensaver (OLED off after 2 s)",
+    "legend.title": "Two switches per page — they do different things:",
+    "legend.master": "IN SCRIPT — decides whether the page is included in your script at all.",
+    "legend.preset": "PRESET — sets the starting state after the first flash; still adjustable on the controller.",
+    "sw.inScript": "IN SCRIPT", "sw.on": "ON", "sw.off": "OFF", "sw.presetHint": "(adjustable later on the controller)",
+    "warn.h": "Notes", "preview.h": "Script preview", "preview.show": "show", "preview.hide": "hide",
+    "preview.none": "No pages selected.", "preview.stats": "{lines} lines · {kb} kB · Config-ID {id}",
+    "btn.download": "💾 Download GPC", "btn.export": "Export preset", "btn.import": "Import preset", "btn.reset": "Reset",
+    "pageCount": "<b>{n}</b> of {total} pages in the script", "footer.base": "based on RAW 40.0 · Support:",
+    "info.btn": "ⓘ Info", "info.title": "Manual — what each page does", "info.close": "Close",
+    "move.up": "Move up", "move.down": "Move down", "reset.confirm": "Reset all settings to the RAW 40.0 defaults?",
+    "import.err": "Preset could not be read: {msg}",
+    "tag.recoil": "Vertical recoil control", "tag.smart": "Dynamic X/Y recoil control", "tag.aim": "Adaptive aim-assist rotation",
+    "tag.roll": "Endless dodge roll while holding", "tag.light": "Flashlight strobe", "tag.rapidfire": "Max fire rate for semi-auto",
+    "tag.snaphook": "1-click grapple-hook macro", "tag.dontshoot": "Auto comm-wheel gesture", "tag.features": "Sub-menu with extra mods",
+    "tag.dropjump": "Drop-shot / jump-shot on R2",
+    "feat.autoping": "Auto-pings enemies while aiming + firing (RB/R1)", "feat.hairtrig": "Digital triggers: 5% pressure = 100% input",
+    "feat.autorun": "Automatic sprint at 95% stick", "feat.flipped": "Swaps LT/RT with LB/RB globally",
+    "feat.norumble": "Blocks game rumble, keeps script rumble", "feat.mfix": "Locks the M-mode against accidental switching",
+    "feat.gunswap": "Turns SNAP HOOK into the gun-swap pocket (needs the SNAP HOOK page)",
+    "f.recoil.tog": "Anti-recoil active on first start", "f.recoil.val": "Strength (−10.0 … +10.0)", "f.recoil.ads": "Only while ADS + firing",
+    "f.smart.tog": "Smart recoil active on first start", "f.smart.x": "X-axis (−10.0 … +10.0)", "f.smart.ads": "Only while ADS + firing",
+    "f.aim.tog": "Aim assist active on first start", "f.aim.val": "Strength (0–10)", "f.aim.speed": "Rotation speed (1–10)", "f.aim.fire": "Only while firing (in addition to ADS)",
+    "f.roll.tog": "Easy roll active on first start", "f.roll.val": "Roll speed (0–10)",
+    "f.light.tog": "Rapid light active on first start", "f.light.val": "Strobe speed (0–10)",
+    "f.rf.tog": "Rapid fire active on first start", "f.rf.val": "Fire rate (0–10)",
+    "f.rf.led": "LED indicator color (pulses non-stop while Rapid Fire is active, as a reminder)",
+    "f.snap.tog": "Snap hook active on first start", "f.snap.trig": "Trigger button (with ADS)",
+    "f.ds.tog": "Dont shoot active on first start", "f.ds.trig": "Trigger button (hold)",
+    "f.dj.drop": "Drop-shot active on first start", "f.dj.dsSpam": "Drop spam (0 = off)", "f.dj.jump": "Jump-shot active on first start",
+    "f.dj.jsSpam": "Jump spam (0 = off)", "f.dj.combo": "Combo-toggle (L2 + D-Pad) active on first start",
+    "led.0": "Off", "led.1": "Red pulsing", "led.2": "Green pulsing", "led.3": "Blue pulsing", "led.4": "RGB rainbow",
+    "btn.XB1_UP": "D-Pad Up", "btn.XB1_DOWN": "D-Pad Down", "btn.XB1_LEFT": "D-Pad Left", "btn.XB1_RIGHT": "D-Pad Right",
+    "btn.XB1_A": "A / Cross", "btn.XB1_B": "B / Circle", "btn.XB1_X": "X / Square", "btn.XB1_Y": "Y / Triangle",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menu / Options",
+    "feat.hint": "Only ticked features appear in the sub-menu. “Preset” = state after the first flash.",
+    "feat.standard": "Preset", "feat.cd.explain": "CD = cooldown. It stops the auto-ping from firing too often and getting annoying.",
+    "feat.cd.maxLabel": "Max cooldown (sec)", "feat.cd.off": "Start: OFF", "feat.cd.step": "Start: {sec}s",
+    "feat.cd.note": "On the Zen the OLED still shows steps 1–5; the actual seconds follow your max value.",
+    "w.noPage": "No page selected — no script can be generated.",
+    "w.featEmpty": "FEATURES page is on but no feature is selected — the page will be dropped automatically.",
+    "w.gunswapNoSnap": "GUN-SWAP needs the SNAP HOOK page — the feature is dropped without it.",
+    "w.smartNoRecoil": "Note: SMART RECOIL without STD RECOIL — the Y value is then set only via the Smart page (right stick).",
+    "w.flippedDefault": "FLIPPED is ON by default — the menu then opens with LT/L2 instead of LB/L1!",
+    "w.noSaver": "Note: without the screensaver the OLED stays on permanently (burn-in risk in very long sessions).",
+    "info.intro": "This tool builds a custom version of the RAW 40.0 ARC RAIDERS script. Below is what every page does. Pages you don't include are removed from the generated script.",
+    "info.navTitle": "How to navigate on the controller",
+    "info.nav": "• Open menu: hold LB/L1 (or LT/L2 if Flipped is on). Release to save instantly.\n• Switch pages: D-Pad Left / Right.\n• Toggle a mod: press A/Cross.\n• Adjust values: D-Pad Up/Down (±0.5) or right stick.",
+    "info.profTitle": "Profile system (top-left OLED shows the mode)",
+    "info.prof": "Hold MENU + press the profile button (RB/R1) to cycle modes.\n• M1: one profile, weapon swap works normally.\n• M2: two profiles — tap Y/Triangle to swap, hold Y to holster (NO GUN), D-Pad Left for pickaxe.\n• M5: five loadouts — hold MENU + tap Y/Triangle to cycle.",
+    "info.pagesTitle": "The pages",
+    "ip.recoil": "Standard vertical recoil compensation. Range −10.0 to +10.0 in 0.5 steps; negative values pull the weapon up. Optionally active only while ADS + firing.",
+    "ip.smart": "Dynamic X/Y recoil control. The vertical (Y) value is shared with STD RECOIL; here you mainly correct left/right drift on the X-axis.",
+    "ip.aim": "Adaptive circular aim assist with a sticky slowdown on fine tracking for a magnetic feel. Rotation speed 1–10.",
+    "ip.roll": "Endless dodge rolls — just hold the slide/crouch button to roll continuously.",
+    "ip.light": "Fun strobe: rapidly spams D-Pad Right to flash your in-game flashlight.",
+    "ip.rapidfire": "Maximizes fire rate for semi-auto weapons (pistols/DMRs). An LED color pulses non-stop while active to remind you rapid fire is on.",
+    "ip.snaphook": "One-click grapple-hook macro. If GUN-SWAP is enabled in FEATURES, this page becomes a gun-swap (weapon-stow) macro instead.",
+    "ip.dontshoot": "Auto comm-wheel gesture on a button you choose. Remap the trigger button on the device.",
+    "ip.features": "Sub-menu with extra mods (D-Pad Up/Down to select): AUTO-PING (auto-ping while aiming+firing, with a cooldown), HAIR-TRIG (digital triggers), AUTO-RUN (auto sprint), FLIPPED (swap LT/RT with LB/RB), NO RUMBLE, M-FIX (lock the M-mode), GUN-SWAP (turn SNAP HOOK into gun-swap).",
+    "ip.dropjump": "Movement tech on R2: DROP-SHOT (also go prone), JUMP-SHOT (also jump), and COMBO-TOG to toggle them in-game with L2 + D-Pad.",
+  },
+  de: {
+    "app.sub": "Stell dir dein persönliches ARC RAIDERS Script (RAW-Edition) zusammen – Seiten wählen, Standardwerte setzen, fertige .gpc-Datei herunterladen.",
+    "steps.1": "Seiten & Features auswählen", "steps.2": "Standardwerte einstellen", "steps.3": ".gpc herunterladen", "steps.4": "In Zen Studio kompilieren & flashen",
+    "globals.h": "Globale Einstellungen", "globals.platform": "Tasten-Symbole", "globals.saver": "Bildschirmschoner (OLED nach 2 s aus)",
+    "legend.title": "Zwei Schalter pro Seite – sie tun Verschiedenes:",
+    "legend.master": "IM SCRIPT – legt fest, ob die Seite überhaupt im Script landet.",
+    "legend.preset": "VOREINSTELLUNG – setzt den Startzustand nach dem ersten Flash; am Controller weiter änderbar.",
+    "sw.inScript": "IM SCRIPT", "sw.on": "AN", "sw.off": "AUS", "sw.presetHint": "(später am Controller änderbar)",
+    "warn.h": "Hinweise", "preview.h": "Script-Vorschau", "preview.show": "anzeigen", "preview.hide": "verbergen",
+    "preview.none": "Keine Seiten gewählt.", "preview.stats": "{lines} Zeilen · {kb} kB · Config-ID {id}",
+    "btn.download": "💾 GPC herunterladen", "btn.export": "Preset exportieren", "btn.import": "Preset importieren", "btn.reset": "Zurücksetzen",
+    "pageCount": "<b>{n}</b> von {total} Seiten im Script", "footer.base": "basiert auf RAW 40.0 · Support:",
+    "info.btn": "ⓘ Info", "info.title": "Anleitung – was jede Seite macht", "info.close": "Schließen",
+    "move.up": "Nach oben", "move.down": "Nach unten", "reset.confirm": "Alle Einstellungen auf die RAW-40.0-Standardwerte zurücksetzen?",
+    "import.err": "Preset konnte nicht gelesen werden: {msg}",
+    "tag.recoil": "Vertikale Rückstoßkontrolle", "tag.smart": "Dynamische X/Y-Rückstoßkontrolle", "tag.aim": "Adaptive Aim-Assist-Rotation",
+    "tag.roll": "Endlos-Rollen bei gehaltener Taste", "tag.light": "Taschenlampen-Strobo", "tag.rapidfire": "Max. Feuerrate für Semi-Automatik",
+    "tag.snaphook": "1-Klick Grapple-Hook-Makro", "tag.dontshoot": "Auto-Comm-Wheel-Geste", "tag.features": "Untermenü mit Extra-Mods",
+    "tag.dropjump": "Drop-Shot / Jump-Shot bei R2",
+    "feat.autoping": "Pingt Gegner automatisch beim Zielen + Feuern (RB/R1)", "feat.hairtrig": "Digitale Trigger: 5% Druck = 100% Eingabe",
+    "feat.autorun": "Automatischer Sprint bei 95% Stick-Ausschlag", "feat.flipped": "Tauscht LT/RT mit LB/RB global",
+    "feat.norumble": "Blockt Spiel-Vibration, Script-Vibration bleibt", "feat.mfix": "Sperrt den M-Modus gegen versehentliches Umschalten",
+    "feat.gunswap": "Macht aus SNAP HOOK die Gun-Swap-Waffentasche (braucht die SNAP-HOOK-Seite)",
+    "f.recoil.tog": "Anti-Recoil beim ersten Start aktiv", "f.recoil.val": "Stärke (−10,0 … +10,0)", "f.recoil.ads": "Nur bei ADS + Feuer",
+    "f.smart.tog": "Smart Recoil beim ersten Start aktiv", "f.smart.x": "X-Achse (−10,0 … +10,0)", "f.smart.ads": "Nur bei ADS + Feuer",
+    "f.aim.tog": "Aim Assist beim ersten Start aktiv", "f.aim.val": "Stärke (0–10)", "f.aim.speed": "Rotations-Geschwindigkeit (1–10)", "f.aim.fire": "Nur bei Feuer (zusätzlich zu ADS)",
+    "f.roll.tog": "Easy Roll beim ersten Start aktiv", "f.roll.val": "Roll-Geschwindigkeit (0–10)",
+    "f.light.tog": "Rapid Light beim ersten Start aktiv", "f.light.val": "Blink-Geschwindigkeit (0–10)",
+    "f.rf.tog": "Rapid Fire beim ersten Start aktiv", "f.rf.val": "Feuerrate (0–10)",
+    "f.rf.led": "LED-Signalfarbe (pulsiert dauerhaft, solange Rapid Fire läuft – als Erinnerung)",
+    "f.snap.tog": "Snap Hook beim ersten Start aktiv", "f.snap.trig": "Auslöse-Taste (mit ADS)",
+    "f.ds.tog": "Dont Shoot beim ersten Start aktiv", "f.ds.trig": "Auslöse-Taste (halten)",
+    "f.dj.drop": "Drop-Shot beim ersten Start aktiv", "f.dj.dsSpam": "Drop-Spam (0 = aus)", "f.dj.jump": "Jump-Shot beim ersten Start aktiv",
+    "f.dj.jsSpam": "Jump-Spam (0 = aus)", "f.dj.combo": "Combo-Toggle (L2 + D-Pad) beim ersten Start aktiv",
+    "led.0": "Aus", "led.1": "Rot pulsierend", "led.2": "Grün pulsierend", "led.3": "Blau pulsierend", "led.4": "RGB-Regenbogen",
+    "btn.XB1_UP": "D-Pad Hoch", "btn.XB1_DOWN": "D-Pad Runter", "btn.XB1_LEFT": "D-Pad Links", "btn.XB1_RIGHT": "D-Pad Rechts",
+    "btn.XB1_A": "A / Kreuz", "btn.XB1_B": "B / Kreis", "btn.XB1_X": "X / Viereck", "btn.XB1_Y": "Y / Dreieck",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menü / Options",
+    "feat.hint": "Nur angehakte Features landen im Untermenü. „Voreinstellung“ = Zustand nach dem ersten Flash.",
+    "feat.standard": "Vorein.", "feat.cd.explain": "CD = Cooldown. Verhindert, dass der Auto-Ping zu oft feuert und nervt.",
+    "feat.cd.maxLabel": "Max. Cooldown (Sek.)", "feat.cd.off": "Start: AUS", "feat.cd.step": "Start: {sec}s",
+    "feat.cd.note": "Am Zen zeigt das OLED weiter Stufe 1–5; die echten Sekunden richten sich nach deinem Max-Wert.",
+    "w.noPage": "Keine Seite ausgewählt – es kann kein Script erzeugt werden.",
+    "w.featEmpty": "FEATURES-Seite ist an, aber kein Feature gewählt – die Seite wird automatisch weggelassen.",
+    "w.gunswapNoSnap": "GUN-SWAP braucht die SNAP-HOOK-Seite – das Feature wird ohne sie weggelassen.",
+    "w.smartNoRecoil": "Hinweis: SMART RECOIL ohne STD RECOIL – der Y-Wert wird dann nur über die Smart-Seite (rechter Stick) eingestellt.",
+    "w.flippedDefault": "FLIPPED ist als Standard AN – das Menü öffnet dann mit LT/L2 statt LB/L1!",
+    "w.noSaver": "Hinweis: Ohne Bildschirmschoner bleibt das OLED dauerhaft an (Einbrenn-Risiko bei sehr langen Sessions).",
+    "info.intro": "Dieses Tool erzeugt eine eigene Version des RAW-40.0-Scripts für ARC RAIDERS. Unten steht, was jede Seite macht. Nicht ausgewählte Seiten werden aus dem erzeugten Script entfernt.",
+    "info.navTitle": "Bedienung am Controller",
+    "info.nav": "• Menü öffnen: LB/L1 halten (oder LT/L2 bei Flipped). Loslassen speichert sofort.\n• Seiten wechseln: D-Pad Links/Rechts.\n• Mod umschalten: A/Kreuz drücken.\n• Werte ändern: D-Pad Hoch/Runter (±0,5) oder rechter Stick.",
+    "info.profTitle": "Profilsystem (M-Modus oben links im OLED)",
+    "info.prof": "MENÜ halten + Profil-Taste (RB/R1) drücken, um Modi zu wechseln.\n• M1: ein Profil, Waffenwechsel normal.\n• M2: zwei Profile – Y/Dreieck tippen zum Wechseln, Y halten zum Holstern (NO GUN), D-Pad Links für Pickaxe.\n• M5: fünf Loadouts – MENÜ halten + Y/Dreieck tippen zum Durchschalten.",
+    "info.pagesTitle": "Die Seiten",
+    "ip.recoil": "Standard-Vertikal-Rückstoßausgleich. Bereich −10,0 bis +10,0 in 0,5-Schritten; negative Werte ziehen die Waffe nach oben. Optional nur bei ADS + Feuer aktiv.",
+    "ip.smart": "Dynamische X/Y-Rückstoßkontrolle. Der vertikale (Y-)Wert wird mit STD RECOIL geteilt; hier korrigierst du vor allem Links-/Rechts-Drift auf der X-Achse.",
+    "ip.aim": "Adaptiver kreisförmiger Aim Assist mit „klebriger“ Verlangsamung beim Feintracking für ein magnetisches Gefühl. Rotationsgeschwindigkeit 1–10.",
+    "ip.roll": "Endlos-Ausweichrollen – einfach die Slide-/Crouch-Taste halten, um durchgehend zu rollen.",
+    "ip.light": "Spaß-Strobo: spammt schnell D-Pad Rechts, um die Taschenlampe im Spiel blinken zu lassen.",
+    "ip.rapidfire": "Maximiert die Feuerrate für Semi-Auto-Waffen (Pistolen/DMRs). Eine LED-Farbe pulsiert dauerhaft, solange aktiv, als Erinnerung.",
+    "ip.snaphook": "Ein-Klick-Grapple-Hook-Makro. Ist GUN-SWAP in FEATURES aktiv, wird diese Seite stattdessen zum Gun-Swap-Makro (Waffe verstauen).",
+    "ip.dontshoot": "Auto-Comm-Wheel-Geste auf einer Taste deiner Wahl. Die Auslöse-Taste wird am Gerät neu belegt.",
+    "ip.features": "Untermenü mit Extra-Mods (D-Pad Hoch/Runter): AUTO-PING (Auto-Ping beim Zielen+Feuern, mit Cooldown), HAIR-TRIG (digitale Trigger), AUTO-RUN (Auto-Sprint), FLIPPED (LT/RT mit LB/RB tauschen), NO RUMBLE, M-FIX (M-Modus sperren), GUN-SWAP (SNAP HOOK zu Gun-Swap machen).",
+    "ip.dropjump": "Bewegungstech auf R2: DROP-SHOT (zusätzlich hinlegen), JUMP-SHOT (zusätzlich springen) und COMBO-TOG, um beide im Spiel mit L2 + D-Pad umzuschalten.",
+  },
+  pt: {
+    "app.sub": "Monte seu script pessoal de ARC RAIDERS (edição RAW) – escolha as páginas, defina os valores padrão e baixe um arquivo .gpc pronto para usar.",
+    "steps.1": "Selecionar páginas e recursos", "steps.2": "Definir valores padrão", "steps.3": "Baixar .gpc", "steps.4": "Compilar e gravar no Zen Studio",
+    "globals.h": "Configurações globais", "globals.platform": "Símbolos dos botões", "globals.saver": "Protetor de tela (OLED desliga após 2 s)",
+    "legend.title": "Dois interruptores por página – com funções diferentes:",
+    "legend.master": "NO SCRIPT – define se a página entra no script.",
+    "legend.preset": "PREDEFINIÇÃO – define o estado inicial após a primeira gravação; ainda ajustável no controle.",
+    "sw.inScript": "NO SCRIPT", "sw.on": "LIG", "sw.off": "DESL", "sw.presetHint": "(ajustável depois no controle)",
+    "warn.h": "Observações", "preview.h": "Prévia do script", "preview.show": "mostrar", "preview.hide": "ocultar",
+    "preview.none": "Nenhuma página selecionada.", "preview.stats": "{lines} linhas · {kb} kB · Config-ID {id}",
+    "btn.download": "💾 Baixar GPC", "btn.export": "Exportar preset", "btn.import": "Importar preset", "btn.reset": "Redefinir",
+    "pageCount": "<b>{n}</b> de {total} páginas no script", "footer.base": "baseado no RAW 40.0 · Suporte:",
+    "info.btn": "ⓘ Info", "info.title": "Manual – o que cada página faz", "info.close": "Fechar",
+    "move.up": "Mover para cima", "move.down": "Mover para baixo", "reset.confirm": "Redefinir todas as configurações para os padrões do RAW 40.0?",
+    "import.err": "Não foi possível ler o preset: {msg}",
+    "tag.recoil": "Controle de recuo vertical", "tag.smart": "Controle dinâmico de recuo X/Y", "tag.aim": "Rotação adaptativa de aim assist",
+    "tag.roll": "Rolamento infinito ao segurar o botão", "tag.light": "Estrobo da lanterna", "tag.rapidfire": "Cadência máxima para semiautomáticas",
+    "tag.snaphook": "Macro de gancho em 1 clique", "tag.dontshoot": "Gesto automático da roda de comunicação", "tag.features": "Submenu com mods extras",
+    "tag.dropjump": "Drop-shot / jump-shot no R2",
+    "feat.autoping": "Pinga inimigos automaticamente ao mirar + atirar (RB/R1)", "feat.hairtrig": "Gatilhos digitais: 5% de pressão = 100% de entrada",
+    "feat.autorun": "Corrida automática a 95% do analógico", "feat.flipped": "Troca LT/RT por LB/RB globalmente",
+    "feat.norumble": "Bloqueia a vibração do jogo, mantém a do script", "feat.mfix": "Trava o modo M contra troca acidental",
+    "feat.gunswap": "Transforma o SNAP HOOK no bolso de troca de arma (precisa da página SNAP HOOK)",
+    "f.recoil.tog": "Anti-recuo ativo na primeira inicialização", "f.recoil.val": "Força (−10,0 … +10,0)", "f.recoil.ads": "Somente com ADS + atirando",
+    "f.smart.tog": "Smart recoil ativo na primeira inicialização", "f.smart.x": "Eixo X (−10,0 … +10,0)", "f.smart.ads": "Somente com ADS + atirando",
+    "f.aim.tog": "Aim assist ativo na primeira inicialização", "f.aim.val": "Força (0–10)", "f.aim.speed": "Velocidade de rotação (1–10)", "f.aim.fire": "Somente ao atirar (além do ADS)",
+    "f.roll.tog": "Easy roll ativo na primeira inicialização", "f.roll.val": "Velocidade do rolamento (0–10)",
+    "f.light.tog": "Rapid light ativo na primeira inicialização", "f.light.val": "Velocidade do estrobo (0–10)",
+    "f.rf.tog": "Rapid fire ativo na primeira inicialização", "f.rf.val": "Cadência de tiro (0–10)",
+    "f.rf.led": "Cor do LED indicador (pulsa sem parar enquanto o Rapid Fire está ativo, como lembrete)",
+    "f.snap.tog": "Snap hook ativo na primeira inicialização", "f.snap.trig": "Botão de acionamento (com ADS)",
+    "f.ds.tog": "Dont shoot ativo na primeira inicialização", "f.ds.trig": "Botão de acionamento (segurar)",
+    "f.dj.drop": "Drop-shot ativo na primeira inicialização", "f.dj.dsSpam": "Spam do drop (0 = desl)", "f.dj.jump": "Jump-shot ativo na primeira inicialização",
+    "f.dj.jsSpam": "Spam do jump (0 = desl)", "f.dj.combo": "Combo-toggle (L2 + D-Pad) ativo na primeira inicialização",
+    "led.0": "Desligado", "led.1": "Vermelho pulsante", "led.2": "Verde pulsante", "led.3": "Azul pulsante", "led.4": "Arco-íris RGB",
+    "btn.XB1_UP": "D-Pad Cima", "btn.XB1_DOWN": "D-Pad Baixo", "btn.XB1_LEFT": "D-Pad Esquerda", "btn.XB1_RIGHT": "D-Pad Direita",
+    "btn.XB1_A": "A / Cruz", "btn.XB1_B": "B / Círculo", "btn.XB1_X": "X / Quadrado", "btn.XB1_Y": "Y / Triângulo",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menu / Options",
+    "feat.hint": "Somente recursos marcados aparecem no submenu. “Predefinição” = estado após a primeira gravação.",
+    "feat.standard": "Predef.", "feat.cd.explain": "CD = cooldown (tempo de espera). Evita que o auto-ping dispare com frequência demais e incomode.",
+    "feat.cd.maxLabel": "Cooldown máx. (seg)", "feat.cd.off": "Início: DESL", "feat.cd.step": "Início: {sec}s",
+    "feat.cd.note": "No Zen, o OLED ainda mostra os níveis 1–5; os segundos reais seguem seu valor máximo.",
+    "w.noPage": "Nenhuma página selecionada – não é possível gerar o script.",
+    "w.featEmpty": "A página FEATURES está ligada, mas nenhum recurso foi selecionado – a página será removida automaticamente.",
+    "w.gunswapNoSnap": "GUN-SWAP precisa da página SNAP HOOK – o recurso é removido sem ela.",
+    "w.smartNoRecoil": "Observação: SMART RECOIL sem STD RECOIL – o valor Y é definido apenas pela página Smart (analógico direito).",
+    "w.flippedDefault": "FLIPPED está LIGADO por padrão – o menu abre com LT/L2 em vez de LB/L1!",
+    "w.noSaver": "Observação: sem protetor de tela o OLED fica sempre ligado (risco de burn-in em sessões muito longas).",
+    "info.intro": "Esta ferramenta cria uma versão personalizada do script RAW 40.0 de ARC RAIDERS. Abaixo está o que cada página faz. Páginas não incluídas são removidas do script gerado.",
+    "info.navTitle": "Como navegar no controle",
+    "info.nav": "• Abrir menu: segure LB/L1 (ou LT/L2 se Flipped estiver ligado). Solte para salvar na hora.\n• Trocar páginas: D-Pad Esquerda/Direita.\n• Alternar um mod: pressione A/Cruz.\n• Ajustar valores: D-Pad Cima/Baixo (±0,5) ou analógico direito.",
+    "info.profTitle": "Sistema de perfis (o modo M aparece no canto superior esquerdo do OLED)",
+    "info.prof": "Segure MENU + pressione o botão de perfil (RB/R1) para alternar os modos.\n• M1: um perfil, troca de arma normal.\n• M2: dois perfis – toque Y/Triângulo para trocar, segure Y para guardar a arma (NO GUN), D-Pad Esquerda para a picareta.\n• M5: cinco loadouts – segure MENU + toque Y/Triângulo para alternar.",
+    "info.pagesTitle": "As páginas",
+    "ip.recoil": "Compensação padrão de recuo vertical. Faixa de −10,0 a +10,0 em passos de 0,5; valores negativos puxam a arma para cima. Opcionalmente ativo só com ADS + atirando.",
+    "ip.smart": "Controle dinâmico de recuo X/Y. O valor vertical (Y) é compartilhado com o STD RECOIL; aqui você corrige principalmente o desvio para esquerda/direita no eixo X.",
+    "ip.aim": "Aim assist circular adaptativo com desaceleração “grudenta” no rastreio fino, dando sensação magnética. Velocidade de rotação 1–10.",
+    "ip.roll": "Rolamentos de esquiva infinitos – basta segurar o botão de deslizar/agachar para rolar continuamente.",
+    "ip.light": "Estrobo divertido: spamma o D-Pad Direita rapidamente para piscar a lanterna no jogo.",
+    "ip.rapidfire": "Maximiza a cadência para armas semiautomáticas (pistolas/DMRs). Uma cor de LED pulsa sem parar enquanto ativo, como lembrete.",
+    "ip.snaphook": "Macro de gancho em um clique. Se GUN-SWAP estiver ativado em FEATURES, esta página vira um macro de troca de arma (guardar a arma).",
+    "ip.dontshoot": "Gesto automático da roda de comunicação em um botão à sua escolha. O botão de acionamento é remapeado no dispositivo.",
+    "ip.features": "Submenu com mods extras (D-Pad Cima/Baixo): AUTO-PING (auto-ping ao mirar+atirar, com cooldown), HAIR-TRIG (gatilhos digitais), AUTO-RUN (corrida automática), FLIPPED (trocar LT/RT por LB/RB), NO RUMBLE, M-FIX (travar o modo M), GUN-SWAP (transformar SNAP HOOK em troca de arma).",
+    "ip.dropjump": "Técnica de movimento no R2: DROP-SHOT (também deitar), JUMP-SHOT (também pular) e COMBO-TOG para alterná-los no jogo com L2 + D-Pad.",
+  },
+  es: {
+    "app.sub": "Crea tu script personal de ARC RAIDERS (edición RAW): elige las páginas, ajusta los valores predeterminados y descarga un archivo .gpc listo para usar.",
+    "steps.1": "Seleccionar páginas y funciones", "steps.2": "Ajustar valores predeterminados", "steps.3": "Descargar .gpc", "steps.4": "Compilar y grabar en Zen Studio",
+    "globals.h": "Ajustes globales", "globals.platform": "Símbolos de botones", "globals.saver": "Salvapantallas (OLED se apaga tras 2 s)",
+    "legend.title": "Dos interruptores por página, con funciones distintas:",
+    "legend.master": "EN EL SCRIPT: decide si la página se incluye en el script.",
+    "legend.preset": "PREAJUSTE: fija el estado inicial tras la primera grabación; se puede cambiar en el mando.",
+    "sw.inScript": "EN EL SCRIPT", "sw.on": "ON", "sw.off": "OFF", "sw.presetHint": "(ajustable después en el mando)",
+    "warn.h": "Notas", "preview.h": "Vista previa del script", "preview.show": "mostrar", "preview.hide": "ocultar",
+    "preview.none": "No hay páginas seleccionadas.", "preview.stats": "{lines} líneas · {kb} kB · Config-ID {id}",
+    "btn.download": "💾 Descargar GPC", "btn.export": "Exportar preajuste", "btn.import": "Importar preajuste", "btn.reset": "Restablecer",
+    "pageCount": "<b>{n}</b> de {total} páginas en el script", "footer.base": "basado en RAW 40.0 · Soporte:",
+    "info.btn": "ⓘ Info", "info.title": "Manual: qué hace cada página", "info.close": "Cerrar",
+    "move.up": "Subir", "move.down": "Bajar", "reset.confirm": "¿Restablecer todos los ajustes a los valores predeterminados de RAW 40.0?",
+    "import.err": "No se pudo leer el preajuste: {msg}",
+    "tag.recoil": "Control de retroceso vertical", "tag.smart": "Control dinámico de retroceso X/Y", "tag.aim": "Rotación adaptativa de aim assist",
+    "tag.roll": "Rodada infinita al mantener el botón", "tag.light": "Estrobo de la linterna", "tag.rapidfire": "Cadencia máxima para semiautomáticas",
+    "tag.snaphook": "Macro de gancho en 1 clic", "tag.dontshoot": "Gesto automático de la rueda de comunicación", "tag.features": "Submenú con mods extra",
+    "tag.dropjump": "Drop-shot / jump-shot en R2",
+    "feat.autoping": "Marca enemigos automáticamente al apuntar + disparar (RB/R1)", "feat.hairtrig": "Gatillos digitales: 5% de presión = 100% de entrada",
+    "feat.autorun": "Esprint automático al 95% del stick", "feat.flipped": "Intercambia LT/RT con LB/RB globalmente",
+    "feat.norumble": "Bloquea la vibración del juego, mantiene la del script", "feat.mfix": "Bloquea el modo M contra cambios accidentales",
+    "feat.gunswap": "Convierte SNAP HOOK en el bolsillo de cambio de arma (necesita la página SNAP HOOK)",
+    "f.recoil.tog": "Anti-retroceso activo al primer inicio", "f.recoil.val": "Fuerza (−10,0 … +10,0)", "f.recoil.ads": "Solo con ADS + disparando",
+    "f.smart.tog": "Smart recoil activo al primer inicio", "f.smart.x": "Eje X (−10,0 … +10,0)", "f.smart.ads": "Solo con ADS + disparando",
+    "f.aim.tog": "Aim assist activo al primer inicio", "f.aim.val": "Fuerza (0–10)", "f.aim.speed": "Velocidad de rotación (1–10)", "f.aim.fire": "Solo al disparar (además de ADS)",
+    "f.roll.tog": "Easy roll activo al primer inicio", "f.roll.val": "Velocidad de rodada (0–10)",
+    "f.light.tog": "Rapid light activo al primer inicio", "f.light.val": "Velocidad del estrobo (0–10)",
+    "f.rf.tog": "Rapid fire activo al primer inicio", "f.rf.val": "Cadencia de disparo (0–10)",
+    "f.rf.led": "Color del LED indicador (parpadea sin parar mientras Rapid Fire está activo, como recordatorio)",
+    "f.snap.tog": "Snap hook activo al primer inicio", "f.snap.trig": "Botón de activación (con ADS)",
+    "f.ds.tog": "Dont shoot activo al primer inicio", "f.ds.trig": "Botón de activación (mantener)",
+    "f.dj.drop": "Drop-shot activo al primer inicio", "f.dj.dsSpam": "Spam de drop (0 = desac.)", "f.dj.jump": "Jump-shot activo al primer inicio",
+    "f.dj.jsSpam": "Spam de jump (0 = desac.)", "f.dj.combo": "Combo-toggle (L2 + D-Pad) activo al primer inicio",
+    "led.0": "Apagado", "led.1": "Rojo pulsante", "led.2": "Verde pulsante", "led.3": "Azul pulsante", "led.4": "Arcoíris RGB",
+    "btn.XB1_UP": "D-Pad Arriba", "btn.XB1_DOWN": "D-Pad Abajo", "btn.XB1_LEFT": "D-Pad Izquierda", "btn.XB1_RIGHT": "D-Pad Derecha",
+    "btn.XB1_A": "A / Cruz", "btn.XB1_B": "B / Círculo", "btn.XB1_X": "X / Cuadrado", "btn.XB1_Y": "Y / Triángulo",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menú / Options",
+    "feat.hint": "Solo las funciones marcadas aparecen en el submenú. “Preajuste” = estado tras la primera grabación.",
+    "feat.standard": "Preaj.", "feat.cd.explain": "CD = cooldown (tiempo de espera). Evita que el auto-ping se dispare demasiado a menudo y moleste.",
+    "feat.cd.maxLabel": "Cooldown máx. (seg)", "feat.cd.off": "Inicio: OFF", "feat.cd.step": "Inicio: {sec}s",
+    "feat.cd.note": "En el Zen, el OLED sigue mostrando niveles 1–5; los segundos reales dependen de tu valor máximo.",
+    "w.noPage": "No hay ninguna página seleccionada: no se puede generar el script.",
+    "w.featEmpty": "La página FEATURES está activada pero no hay ninguna función seleccionada: la página se omitirá automáticamente.",
+    "w.gunswapNoSnap": "GUN-SWAP necesita la página SNAP HOOK: la función se omite sin ella.",
+    "w.smartNoRecoil": "Nota: SMART RECOIL sin STD RECOIL: el valor Y se ajusta solo desde la página Smart (stick derecho).",
+    "w.flippedDefault": "FLIPPED está activado por defecto: ¡el menú se abre con LT/L2 en vez de LB/L1!",
+    "w.noSaver": "Nota: sin salvapantallas el OLED queda siempre encendido (riesgo de burn-in en sesiones muy largas).",
+    "info.intro": "Esta herramienta crea una versión personalizada del script RAW 40.0 de ARC RAIDERS. Abajo se explica qué hace cada página. Las páginas no incluidas se eliminan del script generado.",
+    "info.navTitle": "Cómo navegar en el mando",
+    "info.nav": "• Abrir menú: mantén LB/L1 (o LT/L2 si Flipped está activo). Suelta para guardar al instante.\n• Cambiar páginas: D-Pad Izquierda/Derecha.\n• Alternar un mod: pulsa A/Cruz.\n• Ajustar valores: D-Pad Arriba/Abajo (±0,5) o stick derecho.",
+    "info.profTitle": "Sistema de perfiles (el modo M aparece arriba a la izquierda del OLED)",
+    "info.prof": "Mantén MENÚ + pulsa el botón de perfil (RB/R1) para cambiar de modo.\n• M1: un perfil, cambio de arma normal.\n• M2: dos perfiles: toca Y/Triángulo para cambiar, mantén Y para guardar el arma (NO GUN), D-Pad Izquierda para el pico.\n• M5: cinco equipamientos: mantén MENÚ + toca Y/Triángulo para alternar.",
+    "info.pagesTitle": "Las páginas",
+    "ip.recoil": "Compensación estándar de retroceso vertical. Rango de −10,0 a +10,0 en pasos de 0,5; los valores negativos tiran del arma hacia arriba. Opcionalmente activo solo con ADS + disparando.",
+    "ip.smart": "Control dinámico de retroceso X/Y. El valor vertical (Y) se comparte con STD RECOIL; aquí corriges sobre todo la desviación izquierda/derecha en el eje X.",
+    "ip.aim": "Aim assist circular adaptativo con una desaceleración “pegajosa” en el seguimiento fino para una sensación magnética. Velocidad de rotación 1–10.",
+    "ip.roll": "Rodadas de esquiva infinitas: solo mantén el botón de deslizar/agacharse para rodar continuamente.",
+    "ip.light": "Estrobo divertido: spamea rápidamente D-Pad Derecha para hacer parpadear la linterna del juego.",
+    "ip.rapidfire": "Maximiza la cadencia para armas semiautomáticas (pistolas/DMR). Un color de LED parpadea sin parar mientras está activo, como recordatorio.",
+    "ip.snaphook": "Macro de gancho de un clic. Si GUN-SWAP está activado en FEATURES, esta página se convierte en un macro de cambio de arma (guardar el arma).",
+    "ip.dontshoot": "Gesto automático de la rueda de comunicación en un botón que elijas. El botón de activación se reasigna en el dispositivo.",
+    "ip.features": "Submenú con mods extra (D-Pad Arriba/Abajo): AUTO-PING (auto-ping al apuntar+disparar, con cooldown), HAIR-TRIG (gatillos digitales), AUTO-RUN (esprint automático), FLIPPED (cambiar LT/RT por LB/RB), NO RUMBLE, M-FIX (bloquear el modo M), GUN-SWAP (convertir SNAP HOOK en cambio de arma).",
+    "ip.dropjump": "Técnica de movimiento en R2: DROP-SHOT (también cuerpo a tierra), JUMP-SHOT (también saltar) y COMBO-TOG para alternarlos en el juego con L2 + D-Pad.",
+  },
+  ru: {
+    "app.sub": "Соберите свой личный скрипт ARC RAIDERS (RAW-издание): выберите страницы, задайте значения по умолчанию и скачайте готовый файл .gpc.",
+    "steps.1": "Выбрать страницы и функции", "steps.2": "Задать значения по умолчанию", "steps.3": "Скачать .gpc", "steps.4": "Скомпилировать и прошить в Zen Studio",
+    "globals.h": "Общие настройки", "globals.platform": "Символы кнопок", "globals.saver": "Скринсейвер (OLED гаснет через 2 с)",
+    "legend.title": "Два переключателя на страницу — с разными функциями:",
+    "legend.master": "В СКРИПТЕ — определяет, войдёт ли страница в скрипт.",
+    "legend.preset": "ПРЕДУСТАНОВКА — задаёт начальное состояние после первой прошивки; потом меняется на контроллере.",
+    "sw.inScript": "В СКРИПТЕ", "sw.on": "ВКЛ", "sw.off": "ВЫКЛ", "sw.presetHint": "(позже настраивается на контроллере)",
+    "warn.h": "Примечания", "preview.h": "Предпросмотр скрипта", "preview.show": "показать", "preview.hide": "скрыть",
+    "preview.none": "Страницы не выбраны.", "preview.stats": "{lines} строк · {kb} кБ · Config-ID {id}",
+    "btn.download": "💾 Скачать GPC", "btn.export": "Экспорт пресета", "btn.import": "Импорт пресета", "btn.reset": "Сбросить",
+    "pageCount": "<b>{n}</b> из {total} страниц в скрипте", "footer.base": "на основе RAW 40.0 · Поддержка:",
+    "info.btn": "ⓘ Инфо", "info.title": "Руководство — что делает каждая страница", "info.close": "Закрыть",
+    "move.up": "Вверх", "move.down": "Вниз", "reset.confirm": "Сбросить все настройки к значениям RAW 40.0 по умолчанию?",
+    "import.err": "Не удалось прочитать пресет: {msg}",
+    "tag.recoil": "Вертикальный контроль отдачи", "tag.smart": "Динамический контроль отдачи X/Y", "tag.aim": "Адаптивная ротация aim assist",
+    "tag.roll": "Бесконечные перекаты при удержании", "tag.light": "Строб фонарика", "tag.rapidfire": "Макс. скорострельность для полуавтоматов",
+    "tag.snaphook": "Макрос крюка-кошки в 1 клик", "tag.dontshoot": "Авто-жест колеса связи", "tag.features": "Подменю с доп. модами",
+    "tag.dropjump": "Drop-shot / jump-shot на R2",
+    "feat.autoping": "Авто-пинг врагов при прицеливании + стрельбе (RB/R1)", "feat.hairtrig": "Цифровые триггеры: 5% нажатия = 100% ввода",
+    "feat.autorun": "Автоматический спринт при 95% стика", "feat.flipped": "Меняет местами LT/RT и LB/RB глобально",
+    "feat.norumble": "Блокирует вибрацию игры, оставляет вибрацию скрипта", "feat.mfix": "Блокирует режим M от случайного переключения",
+    "feat.gunswap": "Превращает SNAP HOOK в карман смены оружия (нужна страница SNAP HOOK)",
+    "f.recoil.tog": "Anti-recoil включён при первом запуске", "f.recoil.val": "Сила (−10,0 … +10,0)", "f.recoil.ads": "Только при ADS + стрельбе",
+    "f.smart.tog": "Smart recoil включён при первом запуске", "f.smart.x": "Ось X (−10,0 … +10,0)", "f.smart.ads": "Только при ADS + стрельбе",
+    "f.aim.tog": "Aim assist включён при первом запуске", "f.aim.val": "Сила (0–10)", "f.aim.speed": "Скорость вращения (1–10)", "f.aim.fire": "Только при стрельбе (в дополнение к ADS)",
+    "f.roll.tog": "Easy roll включён при первом запуске", "f.roll.val": "Скорость переката (0–10)",
+    "f.light.tog": "Rapid light включён при первом запуске", "f.light.val": "Скорость строба (0–10)",
+    "f.rf.tog": "Rapid fire включён при первом запуске", "f.rf.val": "Скорострельность (0–10)",
+    "f.rf.led": "Цвет индикатора LED (постоянно пульсирует, пока активен Rapid Fire — как напоминание)",
+    "f.snap.tog": "Snap hook включён при первом запуске", "f.snap.trig": "Кнопка активации (с ADS)",
+    "f.ds.tog": "Dont shoot включён при первом запуске", "f.ds.trig": "Кнопка активации (удержание)",
+    "f.dj.drop": "Drop-shot включён при первом запуске", "f.dj.dsSpam": "Спам drop (0 = выкл)", "f.dj.jump": "Jump-shot включён при первом запуске",
+    "f.dj.jsSpam": "Спам jump (0 = выкл)", "f.dj.combo": "Combo-toggle (L2 + D-Pad) включён при первом запуске",
+    "led.0": "Выкл", "led.1": "Красный пульсирующий", "led.2": "Зелёный пульсирующий", "led.3": "Синий пульсирующий", "led.4": "RGB-радуга",
+    "btn.XB1_UP": "D-Pad Вверх", "btn.XB1_DOWN": "D-Pad Вниз", "btn.XB1_LEFT": "D-Pad Влево", "btn.XB1_RIGHT": "D-Pad Вправо",
+    "btn.XB1_A": "A / Крест", "btn.XB1_B": "B / Круг", "btn.XB1_X": "X / Квадрат", "btn.XB1_Y": "Y / Треугольник",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Тачпад", "btn.XB1_MENU": "Menu / Options",
+    "feat.hint": "В подменю попадают только отмеченные функции. «Предустановка» = состояние после первой прошивки.",
+    "feat.standard": "Предуст.", "feat.cd.explain": "CD = cooldown (перезарядка). Не даёт авто-пингу срабатывать слишком часто и раздражать.",
+    "feat.cd.maxLabel": "Макс. cooldown (сек)", "feat.cd.off": "Старт: ВЫКЛ", "feat.cd.step": "Старт: {sec}с",
+    "feat.cd.note": "На Zen OLED по-прежнему показывает ступени 1–5; реальные секунды зависят от вашего максимума.",
+    "w.noPage": "Не выбрано ни одной страницы — скрипт не может быть создан.",
+    "w.featEmpty": "Страница FEATURES включена, но не выбрано ни одной функции — страница будет автоматически убрана.",
+    "w.gunswapNoSnap": "GUN-SWAP требует страницу SNAP HOOK — без неё функция убирается.",
+    "w.smartNoRecoil": "Примечание: SMART RECOIL без STD RECOIL — значение Y задаётся только через страницу Smart (правый стик).",
+    "w.flippedDefault": "FLIPPED включён по умолчанию — меню тогда открывается на LT/L2 вместо LB/L1!",
+    "w.noSaver": "Примечание: без скринсейвера OLED горит постоянно (риск выгорания при очень долгих сессиях).",
+    "info.intro": "Этот инструмент создаёт свою версию скрипта RAW 40.0 для ARC RAIDERS. Ниже описано, что делает каждая страница. Невыбранные страницы удаляются из создаваемого скрипта.",
+    "info.navTitle": "Управление на контроллере",
+    "info.nav": "• Открыть меню: удерживайте LB/L1 (или LT/L2 при Flipped). Отпустите — сразу сохранится.\n• Смена страниц: D-Pad Влево/Вправо.\n• Переключить мод: нажмите A/Крест.\n• Изменить значения: D-Pad Вверх/Вниз (±0,5) или правый стик.",
+    "info.profTitle": "Система профилей (режим M — вверху слева на OLED)",
+    "info.prof": "Удерживайте МЕНЮ + нажмите кнопку профиля (RB/R1) для смены режимов.\n• M1: один профиль, смена оружия обычная.\n• M2: два профиля — нажмите Y/Треугольник для смены, удерживайте Y чтобы убрать оружие (NO GUN), D-Pad Влево для кирки.\n• M5: пять наборов — удерживайте МЕНЮ + нажимайте Y/Треугольник для переключения.",
+    "info.pagesTitle": "Страницы",
+    "ip.recoil": "Стандартная компенсация вертикальной отдачи. Диапазон от −10,0 до +10,0 с шагом 0,5; отрицательные значения тянут оружие вверх. По желанию активно только при ADS + стрельбе.",
+    "ip.smart": "Динамический контроль отдачи X/Y. Вертикальное значение (Y) общее со STD RECOIL; здесь вы в основном корректируете увод влево/вправо по оси X.",
+    "ip.aim": "Адаптивный круговой aim assist с «липким» замедлением при точном трекинге для магнитного ощущения. Скорость вращения 1–10.",
+    "ip.roll": "Бесконечные перекаты уклонения — просто удерживайте кнопку слайда/приседа для непрерывных перекатов.",
+    "ip.light": "Строб для веселья: быстро спамит D-Pad Вправо, мигая игровым фонариком.",
+    "ip.rapidfire": "Максимизирует скорострельность для полуавтоматов (пистолеты/DMR). Цвет LED постоянно пульсирует, пока активно, как напоминание.",
+    "ip.snaphook": "Макрос крюка-кошки в один клик. Если в FEATURES включён GUN-SWAP, эта страница вместо этого становится макросом смены оружия (убрать оружие).",
+    "ip.dontshoot": "Авто-жест колеса связи на выбранной вами кнопке. Кнопку активации можно переназначить на устройстве.",
+    "ip.features": "Подменю с доп. модами (D-Pad Вверх/Вниз): AUTO-PING (авто-пинг при прицеливании+стрельбе, с cooldown), HAIR-TRIG (цифровые триггеры), AUTO-RUN (авто-спринт), FLIPPED (поменять LT/RT и LB/RB), NO RUMBLE, M-FIX (заблокировать режим M), GUN-SWAP (сделать SNAP HOOK сменой оружия).",
+    "ip.dropjump": "Техника движения на R2: DROP-SHOT (ещё и лечь), JUMP-SHOT (ещё и прыжок) и COMBO-TOG для их переключения в игре через L2 + D-Pad.",
+  },
+  tr: {
+    "app.sub": "Kişisel ARC RAIDERS scriptini (RAW sürümü) oluştur: sayfaları seç, varsayılan değerleri ayarla ve kullanıma hazır bir .gpc dosyası indir.",
+    "steps.1": "Sayfaları ve özellikleri seç", "steps.2": "Varsayılan değerleri ayarla", "steps.3": ".gpc indir", "steps.4": "Zen Studio'da derle ve yükle",
+    "globals.h": "Genel ayarlar", "globals.platform": "Tuş sembolleri", "globals.saver": "Ekran koruyucu (OLED 2 sn sonra kapanır)",
+    "legend.title": "Sayfa başına iki anahtar — farklı işlevler:",
+    "legend.master": "SCRIPT'TE — sayfanın script'e dahil edilip edilmeyeceğini belirler.",
+    "legend.preset": "ÖN AYAR — ilk yüklemeden sonraki başlangıç durumunu ayarlar; kolda yine değiştirilebilir.",
+    "sw.inScript": "SCRIPT'TE", "sw.on": "AÇIK", "sw.off": "KAPALI", "sw.presetHint": "(sonra kolda değiştirilebilir)",
+    "warn.h": "Notlar", "preview.h": "Script önizlemesi", "preview.show": "göster", "preview.hide": "gizle",
+    "preview.none": "Sayfa seçilmedi.", "preview.stats": "{lines} satır · {kb} kB · Config-ID {id}",
+    "btn.download": "💾 GPC indir", "btn.export": "Ön ayarı dışa aktar", "btn.import": "Ön ayarı içe aktar", "btn.reset": "Sıfırla",
+    "pageCount": "script'te {total} sayfadan <b>{n}</b> tanesi", "footer.base": "RAW 40.0 tabanlı · Destek:",
+    "info.btn": "ⓘ Bilgi", "info.title": "Kılavuz — her sayfa ne yapar", "info.close": "Kapat",
+    "move.up": "Yukarı taşı", "move.down": "Aşağı taşı", "reset.confirm": "Tüm ayarlar RAW 40.0 varsayılanlarına sıfırlansın mı?",
+    "import.err": "Ön ayar okunamadı: {msg}",
+    "tag.recoil": "Dikey geri tepme kontrolü", "tag.smart": "Dinamik X/Y geri tepme kontrolü", "tag.aim": "Uyarlanabilir aim assist dönüşü",
+    "tag.roll": "Tuşu basılı tutunca sonsuz takla", "tag.light": "El feneri stroboskobu", "tag.rapidfire": "Yarı otomatikler için maks. atış hızı",
+    "tag.snaphook": "Tek tıkla kanca makrosu", "tag.dontshoot": "Otomatik iletişim çarkı hareketi", "tag.features": "Ekstra modlu alt menü",
+    "tag.dropjump": "R2'de drop-shot / jump-shot",
+    "feat.autoping": "Nişan alıp ateş ederken düşmanları otomatik pingler (RB/R1)", "feat.hairtrig": "Dijital tetikler: %5 basınç = %100 giriş",
+    "feat.autorun": "Çubuk %95'te otomatik koşu", "feat.flipped": "LT/RT ile LB/RB'yi genel olarak değiştirir",
+    "feat.norumble": "Oyun titreşimini engeller, script titreşimini korur", "feat.mfix": "M modunu yanlışlıkla değişime karşı kilitler",
+    "feat.gunswap": "SNAP HOOK'u silah değiştirme cebine dönüştürür (SNAP HOOK sayfası gerekir)",
+    "f.recoil.tog": "İlk başlatmada anti-recoil açık", "f.recoil.val": "Güç (−10,0 … +10,0)", "f.recoil.ads": "Yalnızca ADS + ateş ederken",
+    "f.smart.tog": "İlk başlatmada smart recoil açık", "f.smart.x": "X ekseni (−10,0 … +10,0)", "f.smart.ads": "Yalnızca ADS + ateş ederken",
+    "f.aim.tog": "İlk başlatmada aim assist açık", "f.aim.val": "Güç (0–10)", "f.aim.speed": "Dönüş hızı (1–10)", "f.aim.fire": "Yalnızca ateş ederken (ADS'e ek olarak)",
+    "f.roll.tog": "İlk başlatmada easy roll açık", "f.roll.val": "Takla hızı (0–10)",
+    "f.light.tog": "İlk başlatmada rapid light açık", "f.light.val": "Strobo hızı (0–10)",
+    "f.rf.tog": "İlk başlatmada rapid fire açık", "f.rf.val": "Atış hızı (0–10)",
+    "f.rf.led": "LED gösterge rengi (Rapid Fire etkinken hatırlatma olarak sürekli yanıp söner)",
+    "f.snap.tog": "İlk başlatmada snap hook açık", "f.snap.trig": "Tetik tuşu (ADS ile)",
+    "f.ds.tog": "İlk başlatmada dont shoot açık", "f.ds.trig": "Tetik tuşu (basılı tut)",
+    "f.dj.drop": "İlk başlatmada drop-shot açık", "f.dj.dsSpam": "Drop spam (0 = kapalı)", "f.dj.jump": "İlk başlatmada jump-shot açık",
+    "f.dj.jsSpam": "Jump spam (0 = kapalı)", "f.dj.combo": "İlk başlatmada combo-toggle (L2 + D-Pad) açık",
+    "led.0": "Kapalı", "led.1": "Kırmızı yanıp sönen", "led.2": "Yeşil yanıp sönen", "led.3": "Mavi yanıp sönen", "led.4": "RGB gökkuşağı",
+    "btn.XB1_UP": "D-Pad Yukarı", "btn.XB1_DOWN": "D-Pad Aşağı", "btn.XB1_LEFT": "D-Pad Sol", "btn.XB1_RIGHT": "D-Pad Sağ",
+    "btn.XB1_A": "A / Çarpı", "btn.XB1_B": "B / Daire", "btn.XB1_X": "X / Kare", "btn.XB1_Y": "Y / Üçgen",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menu / Options",
+    "feat.hint": "Alt menüde yalnızca işaretli özellikler görünür. “Ön ayar” = ilk yüklemeden sonraki durum.",
+    "feat.standard": "Ön ayar", "feat.cd.explain": "CD = cooldown (bekleme süresi). Auto-ping'in çok sık çalışıp rahatsız etmesini önler.",
+    "feat.cd.maxLabel": "Maks. cooldown (sn)", "feat.cd.off": "Başlangıç: KAPALI", "feat.cd.step": "Başlangıç: {sec}sn",
+    "feat.cd.note": "Zen'de OLED hâlâ 1–5 kademesini gösterir; gerçek saniyeler maksimum değerine göre değişir.",
+    "w.noPage": "Hiç sayfa seçilmedi — script oluşturulamaz.",
+    "w.featEmpty": "FEATURES sayfası açık ama hiçbir özellik seçilmedi — sayfa otomatik olarak çıkarılır.",
+    "w.gunswapNoSnap": "GUN-SWAP, SNAP HOOK sayfasını gerektirir — o olmadan özellik çıkarılır.",
+    "w.smartNoRecoil": "Not: STD RECOIL olmadan SMART RECOIL — Y değeri yalnızca Smart sayfasından (sağ çubuk) ayarlanır.",
+    "w.flippedDefault": "FLIPPED varsayılan olarak AÇIK — menü o zaman LB/L1 yerine LT/L2 ile açılır!",
+    "w.noSaver": "Not: ekran koruyucu olmadan OLED sürekli açık kalır (çok uzun oturumlarda yanma riski).",
+    "info.intro": "Bu araç, ARC RAIDERS için RAW 40.0 script'inin özel bir sürümünü oluşturur. Aşağıda her sayfanın ne yaptığı yazılıdır. Dahil edilmeyen sayfalar oluşturulan script'ten çıkarılır.",
+    "info.navTitle": "Kolda gezinme",
+    "info.nav": "• Menüyü aç: LB/L1'i basılı tut (Flipped açıksa LT/L2). Bırakınca anında kaydeder.\n• Sayfa değiştir: D-Pad Sol/Sağ.\n• Mod aç/kapat: A/Çarpı'ya bas.\n• Değer ayarla: D-Pad Yukarı/Aşağı (±0,5) veya sağ çubuk.",
+    "info.profTitle": "Profil sistemi (M modu OLED'in sol üstünde)",
+    "info.prof": "Modları değiştirmek için MENU'yü basılı tut + profil tuşuna (RB/R1) bas.\n• M1: tek profil, silah değişimi normal.\n• M2: iki profil — değiştirmek için Y/Üçgen'e dokun, silahı kaldırmak için Y'yi basılı tut (NO GUN), kazma için D-Pad Sol.\n• M5: beş donanım — MENU'yü basılı tut + Y/Üçgen'e dokunarak geç.",
+    "info.pagesTitle": "Sayfalar",
+    "ip.recoil": "Standart dikey geri tepme telafisi. −10,0 ile +10,0 arası, 0,5 adımlarla; negatif değerler silahı yukarı çeker. İsteğe bağlı olarak yalnızca ADS + ateş ederken etkin.",
+    "ip.smart": "Dinamik X/Y geri tepme kontrolü. Dikey (Y) değer STD RECOIL ile paylaşılır; burada çoğunlukla X eksenindeki sol/sağ kaymayı düzeltirsin.",
+    "ip.aim": "İnce takipte “yapışkan” yavaşlamayla manyetik his veren uyarlanabilir dairesel aim assist. Dönüş hızı 1–10.",
+    "ip.roll": "Sonsuz kaçış takloları — sürekli takla için kayma/eğilme tuşunu basılı tut.",
+    "ip.light": "Eğlenceli strobo: oyun içi el fenerini yakıp söndürmek için D-Pad Sağ'ı hızla spamler.",
+    "ip.rapidfire": "Yarı otomatik silahlar (tabancalar/DMR) için atış hızını en yükseğe çıkarır. Etkinken hatırlatma olarak bir LED rengi sürekli yanıp söner.",
+    "ip.snaphook": "Tek tıkla kanca makrosu. FEATURES'ta GUN-SWAP etkinse bu sayfa yerine silah değiştirme (silahı kaldırma) makrosu olur.",
+    "ip.dontshoot": "Seçtiğin bir tuşta otomatik iletişim çarkı hareketi. Tetik tuşu cihazda yeniden atanır.",
+    "ip.features": "Ekstra modlu alt menü (D-Pad Yukarı/Aşağı): AUTO-PING (nişan+ateşte otomatik ping, cooldown ile), HAIR-TRIG (dijital tetikler), AUTO-RUN (otomatik koşu), FLIPPED (LT/RT ile LB/RB değiştir), NO RUMBLE, M-FIX (M modunu kilitle), GUN-SWAP (SNAP HOOK'u silah değiştirmeye çevir).",
+    "ip.dropjump": "R2'de hareket tekniği: DROP-SHOT (ayrıca yere yat), JUMP-SHOT (ayrıca zıpla) ve bunları oyun içinde L2 + D-Pad ile değiştirmek için COMBO-TOG.",
+  },
+  ar: {
+    "app.sub": "أنشئ سكربت ARC RAIDERS الخاص بك (إصدار RAW): اختر الصفحات، اضبط القيم الافتراضية، ونزّل ملف ‎.gpc جاهزًا للاستخدام.",
+    "steps.1": "اختيار الصفحات والميزات", "steps.2": "ضبط القيم الافتراضية", "steps.3": "تنزيل ‎.gpc", "steps.4": "التجميع والتحميل في Zen Studio",
+    "globals.h": "الإعدادات العامة", "globals.platform": "رموز الأزرار", "globals.saver": "شاشة التوقف (ينطفئ OLED بعد ثانيتين)",
+    "legend.title": "مفتاحان لكل صفحة — بوظيفتين مختلفتين:",
+    "legend.master": "ضمن السكربت — يحدد ما إذا كانت الصفحة ستُضمّن في السكربت.",
+    "legend.preset": "الإعداد المسبق — يحدد الحالة الأولية بعد أول تحميل؛ ويمكن تغييره لاحقًا على وحدة التحكم.",
+    "sw.inScript": "ضمن السكربت", "sw.on": "تشغيل", "sw.off": "إيقاف", "sw.presetHint": "(قابل للتعديل لاحقًا على وحدة التحكم)",
+    "warn.h": "ملاحظات", "preview.h": "معاينة السكربت", "preview.show": "إظهار", "preview.hide": "إخفاء",
+    "preview.none": "لم يتم اختيار أي صفحة.", "preview.stats": "{lines} سطر · {kb} ك.ب · معرّف الإعداد {id}",
+    "btn.download": "💾 تنزيل GPC", "btn.export": "تصدير الإعداد", "btn.import": "استيراد الإعداد", "btn.reset": "إعادة تعيين",
+    "pageCount": "<b>{n}</b> من {total} صفحة في السكربت", "footer.base": "مبني على RAW 40.0 · الدعم:",
+    "info.btn": "ⓘ معلومات", "info.title": "الدليل — ماذا تفعل كل صفحة", "info.close": "إغلاق",
+    "move.up": "تحريك لأعلى", "move.down": "تحريك لأسفل", "reset.confirm": "إعادة تعيين جميع الإعدادات إلى الوضع الافتراضي RAW 40.0؟",
+    "import.err": "تعذّرت قراءة الإعداد: {msg}",
+    "tag.recoil": "التحكم بالارتداد العمودي", "tag.smart": "تحكم ديناميكي بالارتداد X/Y", "tag.aim": "دوران تكيّفي للمساعدة في التصويب",
+    "tag.roll": "تدحرج لا نهائي عند الضغط المستمر", "tag.light": "وميض المصباح", "tag.rapidfire": "أقصى معدل إطلاق للأسلحة نصف الآلية",
+    "tag.snaphook": "ماكرو الخطاف بنقرة واحدة", "tag.dontshoot": "إيماءة عجلة التواصل التلقائية", "tag.features": "قائمة فرعية بإضافات إضافية",
+    "tag.dropjump": "drop-shot / jump-shot على R2",
+    "feat.autoping": "يحدد الأعداء تلقائيًا أثناء التصويب والإطلاق (RB/R1)", "feat.hairtrig": "زنادات رقمية: ضغط 5% = إدخال 100%",
+    "feat.autorun": "ركض تلقائي عند 95% من العصا", "feat.flipped": "يبدّل LT/RT مع LB/RB بشكل عام",
+    "feat.norumble": "يمنع اهتزاز اللعبة ويُبقي اهتزاز السكربت", "feat.mfix": "يقفل وضع M ضد التبديل غير المقصود",
+    "feat.gunswap": "يحوّل SNAP HOOK إلى جيب تبديل السلاح (يتطلب صفحة SNAP HOOK)",
+    "f.recoil.tog": "anti-recoil مفعّل عند أول تشغيل", "f.recoil.val": "القوة (−10.0 … +10.0)", "f.recoil.ads": "فقط أثناء ADS + الإطلاق",
+    "f.smart.tog": "smart recoil مفعّل عند أول تشغيل", "f.smart.x": "المحور X (−10.0 … +10.0)", "f.smart.ads": "فقط أثناء ADS + الإطلاق",
+    "f.aim.tog": "aim assist مفعّل عند أول تشغيل", "f.aim.val": "القوة (0–10)", "f.aim.speed": "سرعة الدوران (1–10)", "f.aim.fire": "فقط أثناء الإطلاق (إضافة إلى ADS)",
+    "f.roll.tog": "easy roll مفعّل عند أول تشغيل", "f.roll.val": "سرعة التدحرج (0–10)",
+    "f.light.tog": "rapid light مفعّل عند أول تشغيل", "f.light.val": "سرعة الوميض (0–10)",
+    "f.rf.tog": "rapid fire مفعّل عند أول تشغيل", "f.rf.val": "معدل الإطلاق (0–10)",
+    "f.rf.led": "لون مؤشر LED (يومض باستمرار أثناء تفعيل Rapid Fire كتذكير)",
+    "f.snap.tog": "snap hook مفعّل عند أول تشغيل", "f.snap.trig": "زر التفعيل (مع ADS)",
+    "f.ds.tog": "dont shoot مفعّل عند أول تشغيل", "f.ds.trig": "زر التفعيل (استمرار الضغط)",
+    "f.dj.drop": "drop-shot مفعّل عند أول تشغيل", "f.dj.dsSpam": "تكرار drop ‏(0 = إيقاف)", "f.dj.jump": "jump-shot مفعّل عند أول تشغيل",
+    "f.dj.jsSpam": "تكرار jump ‏(0 = إيقاف)", "f.dj.combo": "combo-toggle ‏(L2 + D-Pad) مفعّل عند أول تشغيل",
+    "led.0": "إيقاف", "led.1": "أحمر نابض", "led.2": "أخضر نابض", "led.3": "أزرق نابض", "led.4": "قوس قزح RGB",
+    "btn.XB1_UP": "D-Pad أعلى", "btn.XB1_DOWN": "D-Pad أسفل", "btn.XB1_LEFT": "D-Pad يسار", "btn.XB1_RIGHT": "D-Pad يمين",
+    "btn.XB1_A": "A / Cross", "btn.XB1_B": "B / Circle", "btn.XB1_X": "X / Square", "btn.XB1_Y": "Y / Triangle",
+    "btn.XB1_LB": "LB / L1", "btn.XB1_RB": "RB / R1", "btn.XB1_LS": "LS / L3", "btn.XB1_RS": "RS / R3",
+    "btn.XB1_VIEW": "View / Touchpad", "btn.XB1_MENU": "Menu / Options",
+    "feat.hint": "تظهر في القائمة الفرعية الميزات المحددة فقط. «الإعداد المسبق» = الحالة بعد أول تحميل.",
+    "feat.standard": "مسبق", "feat.cd.explain": "CD = زمن الانتظار (cooldown). يمنع تكرار الـ auto-ping بشكل مزعج.",
+    "feat.cd.maxLabel": "أقصى cooldown (ثانية)", "feat.cd.off": "البداية: إيقاف", "feat.cd.step": "البداية: {sec} ثانية",
+    "feat.cd.note": "على الـ Zen ما زال OLED يعرض المستويات 1–5؛ الثواني الفعلية تتبع قيمتك القصوى.",
+    "w.noPage": "لم يتم اختيار أي صفحة — لا يمكن إنشاء السكربت.",
+    "w.featEmpty": "صفحة FEATURES مفعّلة لكن لم يتم اختيار أي ميزة — ستُحذف الصفحة تلقائيًا.",
+    "w.gunswapNoSnap": "يتطلب GUN-SWAP صفحة SNAP HOOK — تُحذف الميزة بدونها.",
+    "w.smartNoRecoil": "ملاحظة: SMART RECOIL بدون STD RECOIL — تُضبط قيمة Y عندئذٍ من صفحة Smart فقط (العصا اليمنى).",
+    "w.flippedDefault": "FLIPPED مفعّل افتراضيًا — تُفتح القائمة عندئذٍ بـ LT/L2 بدل LB/L1!",
+    "w.noSaver": "ملاحظة: بدون شاشة التوقف يبقى OLED مضاءً دائمًا (خطر احتراق الشاشة في الجلسات الطويلة جدًا).",
+    "info.intro": "تنشئ هذه الأداة نسخة مخصصة من سكربت RAW 40.0 للعبة ARC RAIDERS. في الأسفل شرح لكل صفحة. الصفحات غير المُضمّنة تُحذف من السكربت الناتج.",
+    "info.navTitle": "التنقل على وحدة التحكم",
+    "info.nav": "• فتح القائمة: استمر بالضغط على LB/L1 (أو LT/L2 عند تفعيل Flipped). أفلت للحفظ فورًا.\n• تبديل الصفحات: D-Pad يسار/يمين.\n• تبديل المود: اضغط A/Cross.\n• ضبط القيم: D-Pad أعلى/أسفل (±0.5) أو العصا اليمنى.",
+    "info.profTitle": "نظام الملفات الشخصية (وضع M أعلى يسار OLED)",
+    "info.prof": "استمر بالضغط على MENU + اضغط زر الملف الشخصي (RB/R1) لتبديل الأوضاع.\n• M1: ملف واحد، تبديل السلاح عادي.\n• M2: ملفان — انقر Y/Triangle للتبديل، استمر بالضغط على Y لإخفاء السلاح (NO GUN)، D-Pad يسار للفأس.\n• M5: خمس تجهيزات — استمر بالضغط على MENU + انقر Y/Triangle للتنقل.",
+    "info.pagesTitle": "الصفحات",
+    "ip.recoil": "تعويض قياسي للارتداد العمودي. المدى من −10.0 إلى +10.0 بخطوات 0.5؛ القيم السالبة تسحب السلاح للأعلى. اختياريًا يعمل فقط أثناء ADS + الإطلاق.",
+    "ip.smart": "تحكم ديناميكي بالارتداد X/Y. القيمة العمودية (Y) مشتركة مع STD RECOIL؛ هنا تصحّح غالبًا الانحراف يسارًا/يمينًا على المحور X.",
+    "ip.aim": "مساعدة تصويب دائرية تكيّفية مع تباطؤ «لاصق» أثناء التتبع الدقيق لإحساس مغناطيسي. سرعة الدوران 1–10.",
+    "ip.roll": "تدحرجات مراوغة لا نهائية — فقط استمر بالضغط على زر الانزلاق/الانحناء للتدحرج المستمر.",
+    "ip.light": "وميض للتسلية: يكرّر D-Pad يمين بسرعة لإيماض مصباح اللعبة.",
+    "ip.rapidfire": "يرفع معدل الإطلاق للأسلحة نصف الآلية (مسدسات/DMR). يومض لون LED باستمرار أثناء التفعيل كتذكير.",
+    "ip.snaphook": "ماكرو خطاف بنقرة واحدة. إذا فُعّل GUN-SWAP في FEATURES، تصبح هذه الصفحة ماكرو تبديل سلاح (إخفاء السلاح) بدلاً من ذلك.",
+    "ip.dontshoot": "إيماءة عجلة تواصل تلقائية على زر تختاره. يُعاد تعيين زر التفعيل على الجهاز.",
+    "ip.features": "قائمة فرعية بإضافات (D-Pad أعلى/أسفل): AUTO-PING (بينغ تلقائي أثناء التصويب+الإطلاق مع cooldown)، HAIR-TRIG (زنادات رقمية)، AUTO-RUN (ركض تلقائي)، FLIPPED (تبديل LT/RT مع LB/RB)، NO RUMBLE، M-FIX (قفل وضع M)، GUN-SWAP (تحويل SNAP HOOK إلى تبديل سلاح).",
+    "ip.dropjump": "تقنية حركة على R2: DROP-SHOT (الانبطاح أيضًا)، JUMP-SHOT (القفز أيضًا)، وCOMBO-TOG لتبديلهما داخل اللعبة عبر L2 + D-Pad.",
+  },
+};
+
+function t(key, vars) {
+  const L = (typeof cfg !== 'undefined' && cfg && cfg.lang) || 'en';
+  let s = (I18N[L] && I18N[L][key]);
+  if (s == null) s = I18N.en[key];
+  if (s == null) s = key;
+  if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+
+const LS_KEY = 'dadaGpcBuilderCfg_v2';
+const VERSION = [4, 0, 0];               // fest v40.0 (nicht editierbar)
+const DISCORD = 'discord.gg/W825gUj6Nn'; // feste Konstante (nur Footer + Script-Header)
+const LANGS = ['en', 'de', 'pt', 'es', 'ru', 'tr', 'ar'];
+const CANON_ORDER = ['recoil', 'smart', 'aim', 'roll', 'light', 'rapidfire', 'snaphook', 'dontshoot', 'features', 'dropjump'];
 
 function defaultCfg() {
   return {
-    version: [4, 0, 0],
-    discord: 'discord.gg/W825gUj6Nn',
+    version: VERSION.slice(),
+    discord: DISCORD,
+    lang: 'en',
+    order: CANON_ORDER.slice(),
     screensaver: true,
     ps5: 0,
     pages: {
@@ -2167,7 +2737,7 @@ function defaultCfg() {
       snaphook:  { on: true, tog: 1, trigger: 'XB1_MENU' },
       dontshoot: { on: true, tog: 0, trigger: 'XB1_X', delay: 150, hold: 250 },
       features:  { on: true, feats: {
-        autoping: { on: true, def: 0, cd: 0 },
+        autoping: { on: true, def: 0, cd: 0, cdMax: 5 },
         hairtrig: { on: true, def: 1 },
         autorun:  { on: true, def: 0 },
         flipped:  { on: true, def: 0 },
@@ -2192,8 +2762,14 @@ function loadCfg() {
 }
 function mergeCfg(base, saved) {
   if (!saved || typeof saved !== 'object') return;
-  if (Array.isArray(saved.version) && saved.version.length === 3) base.version = saved.version.map(d => Math.min(9, Math.max(0, parseInt(d, 10) || 0)));
-  if (typeof saved.discord === 'string') base.discord = saved.discord;
+  // version & discord sind fest — gespeicherte Werte werden ignoriert.
+  if (typeof saved.lang === 'string' && LANGS.includes(saved.lang)) base.lang = saved.lang;
+  if (Array.isArray(saved.order)) {
+    const valid = saved.order.filter(id => CANON_ORDER.includes(id));
+    // nur übernehmen, wenn genau die bekannten IDs (ohne Duplikate) enthalten sind
+    const uniq = [...new Set(valid)];
+    if (uniq.length === CANON_ORDER.length) base.order = uniq;
+  }
   if (typeof saved.screensaver === 'boolean') base.screensaver = saved.screensaver;
   if (saved.ps5 === 0 || saved.ps5 === 1) base.ps5 = saved.ps5;
   if (saved.pages && typeof saved.pages === 'object') {
@@ -2211,61 +2787,74 @@ function mergeCfg(base, saved) {
       }
     }
   }
+  // Sicherheits-Klemmen
+  const ap = base.pages.features.feats.autoping;
+  ap.cdMax = Math.min(30, Math.max(1, parseInt(ap.cdMax, 10) || 5));
+  if (ap.cd < 0 || ap.cd > 5) ap.cd = 0;
+  base.version = VERSION.slice();
+  base.discord = DISCORD;
 }
 function saveCfg() {
   try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) { /* voll/blockiert → ignorieren */ }
 }
 
 // ---- Feld-Definitionen pro Seiten-Karte ----
+// lk = Label-Key (über t() aufgelöst). Preset-Switches: variant:'preset'.
 const halfFmt = v => (v / 2).toFixed(1).replace('.', ',');
+const spamFmt = v => v === 0 ? t('sw.off') : String(v);
 const CARD_FIELDS = {
   recoil: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'val', type: 'range', min: -20, max: 20, label: 'Stärke (−10,0 … +10,0)', fmt: halfFmt },
-    { key: 'adsOnly', type: 'switch', label: 'Nur bei ADS + Feuer' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.recoil.tog' },
+    { key: 'val', type: 'range', min: -20, max: 20, lk: 'f.recoil.val', fmt: halfFmt },
+    { key: 'adsOnly', type: 'switch', variant: 'preset', lk: 'f.recoil.ads' },
   ],
   smart: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'x', type: 'range', min: -20, max: 20, label: 'X-Achse (−10,0 … +10,0)', fmt: halfFmt },
-    { key: 'adsOnly', type: 'switch', label: 'Nur bei ADS + Feuer' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.smart.tog' },
+    { key: 'x', type: 'range', min: -20, max: 20, lk: 'f.smart.x', fmt: halfFmt },
+    { key: 'adsOnly', type: 'switch', variant: 'preset', lk: 'f.smart.ads' },
   ],
   aim: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'val', type: 'range', min: 0, max: 10, label: 'Stärke (0–10)' },
-    { key: 'speed', type: 'range', min: 1, max: 10, label: 'Rotations-Geschwindigkeit (1–10)' },
-    { key: 'fireOnly', type: 'switch', label: 'Nur bei Feuer (zusätzlich zu ADS)' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.aim.tog' },
+    { key: 'val', type: 'range', min: 0, max: 10, lk: 'f.aim.val' },
+    { key: 'speed', type: 'range', min: 1, max: 10, lk: 'f.aim.speed' },
+    { key: 'fireOnly', type: 'switch', variant: 'preset', lk: 'f.aim.fire' },
   ],
   roll: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'val', type: 'range', min: 0, max: 10, label: 'Roll-Geschwindigkeit (0–10)' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.roll.tog' },
+    { key: 'val', type: 'range', min: 0, max: 10, lk: 'f.roll.val' },
   ],
   light: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'val', type: 'range', min: 0, max: 10, label: 'Blink-Geschwindigkeit (0–10)' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.light.tog' },
+    { key: 'val', type: 'range', min: 0, max: 10, lk: 'f.light.val' },
   ],
   rapidfire: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'val', type: 'range', min: 0, max: 10, label: 'Feuerrate (0–10)' },
-    { key: 'led', type: 'select', label: 'LED beim Schießen', options: [[0, 'Aus'], [1, 'Rot pulsierend'], [2, 'Grün pulsierend'], [3, 'Blau pulsierend'], [4, 'RGB-Regenbogen']] },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.rf.tog' },
+    { key: 'val', type: 'range', min: 0, max: 10, lk: 'f.rf.val' },
+    { key: 'led', type: 'select', lk: 'f.rf.led', opt: 'led' },
   ],
   snaphook: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'trigger', type: 'select', label: 'Auslöse-Taste (mit ADS)', options: TRIGGER_BTNS },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.snap.tog' },
+    { key: 'trigger', type: 'select', lk: 'f.snap.trig', opt: 'trigger' },
   ],
   dontshoot: [
-    { key: 'tog', type: 'switch', label: 'Mod beim ersten Start aktiv' },
-    { key: 'trigger', type: 'select', label: 'Auslöse-Taste (halten)', options: TRIGGER_BTNS },
-    { key: 'delay', type: 'range', min: 50, max: 500, step: 50, label: 'Delay (ms)' },
-    { key: 'hold', type: 'range', min: 50, max: 500, step: 50, label: 'Hold (ms)' },
+    { key: 'tog', type: 'switch', variant: 'preset', lk: 'f.ds.tog' },
+    { key: 'trigger', type: 'select', lk: 'f.ds.trig', opt: 'trigger' },
   ],
   dropjump: [
-    { key: 'drop', type: 'switch', label: 'Drop-Shot beim ersten Start aktiv' },
-    { key: 'dsSpam', type: 'range', min: 0, max: 5, label: 'Drop-Spam (0 = aus)', fmt: v => v === 0 ? 'Aus' : String(v) },
-    { key: 'jump', type: 'switch', label: 'Jump-Shot beim ersten Start aktiv' },
-    { key: 'jsSpam', type: 'range', min: 0, max: 5, label: 'Jump-Spam (0 = aus)', fmt: v => v === 0 ? 'Aus' : String(v) },
-    { key: 'combo', type: 'switch', label: 'Combo-Toggle (L2 + D-Pad) beim Start aktiv' },
+    { key: 'drop', type: 'switch', variant: 'preset', lk: 'f.dj.drop' },
+    { key: 'dsSpam', type: 'range', min: 0, max: 5, lk: 'f.dj.dsSpam', fmt: spamFmt },
+    { key: 'jump', type: 'switch', variant: 'preset', lk: 'f.dj.jump' },
+    { key: 'jsSpam', type: 'range', min: 0, max: 5, lk: 'f.dj.jsSpam', fmt: spamFmt },
+    { key: 'combo', type: 'switch', variant: 'preset', lk: 'f.dj.combo' },
   ],
 };
+
+// Options-Sets für <select> (Labels sprachabhängig)
+function optionSet(name) {
+  if (name === 'trigger') return TRIGGER_BTNS.map(id => [id, t('btn.' + id)]);
+  if (name === 'led') return [0, 1, 2, 3, 4].map(n => [n, t('led.' + n)]);
+  return [];
+}
 
 // ---- DOM-Helfer ----
 function el(html) {
@@ -2273,42 +2862,91 @@ function el(html) {
   t.innerHTML = html.trim();
   return t.content.firstElementChild;
 }
-function mkSwitch(checked, onChange, disabled) {
-  const w = el(`<label class="switch"><input type="checkbox"${checked ? ' checked' : ''}${disabled ? ' disabled' : ''}><span class="knob"></span></label>`);
+const stateTxt = on => on ? t('sw.on') : t('sw.off');
+// variant: 'master' (orange, Seite ins Script) | 'preset' (grün, Startzustand)
+function mkSwitch(checked, variant, onChange, disabled) {
+  const w = el(`<label class="switch${variant ? ' switch--' + variant : ''}"><input type="checkbox"${checked ? ' checked' : ''}${disabled ? ' disabled' : ''}><span class="knob"></span></label>`);
   w.querySelector('input').addEventListener('change', e => onChange(e.target.checked));
   return w;
 }
+// Volle Zeile: Beschriftung + (grüner) Preset-Switch + Status-Text
+function presetRow(labelText, checked, onChange) {
+  const row = el(`<div class="row row-sw"><label>${labelText}</label><span class="swwrap"></span></div>`);
+  const wrap = row.querySelector('.swwrap');
+  const st = el(`<span class="statetxt ${checked ? 'is-on' : 'is-off'}">${stateTxt(checked)}</span>`);
+  const sw = mkSwitch(checked, 'preset', v => {
+    st.textContent = stateTxt(v);
+    st.className = 'statetxt ' + (v ? 'is-on' : 'is-off');
+    onChange(v);
+  });
+  wrap.appendChild(sw); wrap.appendChild(st);
+  return row;
+}
 
-// ---- Seiten-Karten rendern ----
+// ---- Seiten-Karten rendern (in cfg.order-Reihenfolge) ----
 const cardEls = {};
 function renderCards() {
   const wrap = document.getElementById('pages');
   wrap.innerHTML = '';
-  for (const m of MODULES) {
+  const order = orderedModules(cfg).map(m => m.id);
+  order.forEach((id, pos) => {
+    const m = MODULES.find(x => x.id === id);
     const p = cfg.pages[m.id];
     const card = el(`<div class="card"><div class="head">
-        <label class="switch"><input type="checkbox" data-role="pageon"${p.on ? ' checked' : ''}><span class="knob"></span></label>
+        <span class="masterwrap">
+          <label class="switch switch--master"><input type="checkbox" data-role="pageon"${p.on ? ' checked' : ''}><span class="knob"></span></label>
+          <span class="mlabel">${t('sw.inScript')}</span>
+          <span class="statetxt ${p.on ? 'is-on' : 'is-off'}" data-role="masterstate">${stateTxt(p.on)}</span>
+        </span>
         <span class="num" data-role="num">–</span>
-        <span class="title">${m.name}<small>${m.tag}</small></span>
+        <span class="title">${m.name}<small>${t('tag.' + m.id)}</small></span>
+        <span class="movebtns">
+          <button data-role="up" title="${t('move.up')}"${pos === 0 ? ' disabled' : ''}>▲</button>
+          <button data-role="down" title="${t('move.down')}"${pos === order.length - 1 ? ' disabled' : ''}>▼</button>
+        </span>
       </div><div class="body"></div></div>`);
     const body = card.querySelector('.body');
-    card.querySelector('[data-role=pageon]').addEventListener('change', e => {
+    const chk = card.querySelector('[data-role=pageon]');
+    const mstate = card.querySelector('[data-role=masterstate]');
+    chk.addEventListener('change', e => {
       p.on = e.target.checked;
+      mstate.textContent = stateTxt(p.on);
+      mstate.className = 'statetxt ' + (p.on ? 'is-on' : 'is-off');
       onChange();
     });
+    // Klick auf den Kopf (außer Buttons/Switch) schaltet den Master-Toggle
+    card.querySelector('.head').addEventListener('click', e => {
+      if (e.target.closest('button, .switch, .movebtns')) return;
+      chk.checked = !chk.checked;
+      chk.dispatchEvent(new Event('change'));
+    });
+    card.querySelector('[data-role=up]').addEventListener('click', e => { e.stopPropagation(); movePage(m.id, -1); });
+    card.querySelector('[data-role=down]').addEventListener('click', e => { e.stopPropagation(); movePage(m.id, 1); });
     if (m.id === 'features') renderFeatureBody(body);
     else renderFieldBody(body, m.id);
     wrap.appendChild(card);
     cardEls[m.id] = card;
-  }
+  });
+}
+
+function movePage(id, dir) {
+  const ord = orderedModules(cfg).map(m => m.id);
+  const i = ord.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= ord.length) return;
+  [ord[i], ord[j]] = [ord[j], ord[i]];
+  cfg.order = ord;
+  renderCards();
+  onChange();
 }
 
 function renderFieldBody(body, id) {
   const p = cfg.pages[id];
+  let hasPreset = false;
   for (const f of CARD_FIELDS[id]) {
     if (f.type === 'switch') {
-      const row = el(`<div class="row"><label>${f.label}</label></div>`);
-      row.appendChild(mkSwitch(!!p[f.key], v => {
+      hasPreset = true;
+      body.appendChild(presetRow(t(f.lk), !!p[f.key], v => {
         p[f.key] = v ? 1 : 0;
         applyExclusions(id, f.key);
         if (id === 'recoil' && f.key === 'tog') refreshBody('smart');
@@ -2316,10 +2954,9 @@ function renderFieldBody(body, id) {
         if (id === 'dropjump' && (f.key === 'drop' || f.key === 'jump')) refreshBody('dropjump');
         onChange();
       }));
-      body.appendChild(row);
     } else if (f.type === 'range') {
       const fmt = f.fmt || String;
-      const row = el(`<div class="row"><label>${f.label}</label>
+      const row = el(`<div class="row"><label>${t(f.lk)}</label>
         <input type="range" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${p[f.key]}">
         <span class="val">${fmt(p[f.key])}</span></div>`);
       const inp = row.querySelector('input');
@@ -2330,8 +2967,8 @@ function renderFieldBody(body, id) {
       });
       body.appendChild(row);
     } else if (f.type === 'select') {
-      const opts = f.options.map(([v, l]) => `<option value="${v}"${String(p[f.key]) === String(v) ? ' selected' : ''}>${l}</option>`).join('');
-      const row = el(`<div class="row"><label>${f.label}</label><select>${opts}</select></div>`);
+      const opts = optionSet(f.opt).map(([v, l]) => `<option value="${v}"${String(p[f.key]) === String(v) ? ' selected' : ''}>${l}</option>`).join('');
+      const row = el(`<div class="row"><label>${t(f.lk)}</label><select>${opts}</select></div>`);
       row.querySelector('select').addEventListener('change', e => {
         const raw = e.target.value;
         p[f.key] = /^\d+$/.test(raw) ? parseInt(raw, 10) : raw;
@@ -2340,30 +2977,61 @@ function renderFieldBody(body, id) {
       body.appendChild(row);
     }
   }
+  if (hasPreset) body.appendChild(el(`<div class="hint">${t('sw.presetHint')}</div>`));
+}
+
+// Sekunden-Anzeige einer Cooldown-Stufe k (1..5) bei gegebenem Max
+function cdSecLabel(k, cdMax) {
+  const s = k * cdMax / 5;
+  const txt = Number.isInteger(s) ? String(s) : s.toFixed(1);
+  return t('feat.cd.step', { sec: txt });
 }
 
 function renderFeatureBody(body) {
   const feats = cfg.pages.features.feats;
-  body.appendChild(el(`<div class="hint">Nur angehakte Features landen im Untermenü. „Standard" = Zustand beim ersten Start.</div>`));
+  body.appendChild(el(`<div class="hint">${t('feat.hint')}</div>`));
   for (const F of FEATS) {
     const fc = feats[F.id];
     const row = el(`<div class="featrow" data-feat="${F.id}">
-        <label class="switch"><input type="checkbox" data-role="on"${fc.on ? ' checked' : ''}><span class="knob"></span></label>
-        <span class="fname">${F.name}<small>${F.tag}</small></span>
+        <label class="switch switch--master"><input type="checkbox" data-role="on"${fc.on ? ' checked' : ''}><span class="knob"></span></label>
+        <span class="fname">${F.name}<small>${t('feat.' + F.id)}</small></span>
+        <span class="deflabel">${t('feat.standard')}</span>
       </div>`);
     row.querySelector('[data-role=on]').addEventListener('change', e => {
       fc.on = e.target.checked;
+      if (F.id === 'autoping') refreshBody('features');
       onChange();
     });
-    const defWrap = el(`<span class="deflabel">Standard</span>`);
-    row.appendChild(defWrap);
-    row.appendChild(mkSwitch(!!fc.def, v => { fc.def = v ? 1 : 0; onChange(); }));
-    if (F.id === 'autoping') {
-      const sel = el(`<select title="Ping-Cooldown">${[0, 1, 2, 3, 4, 5].map(v => `<option value="${v}"${fc.cd === v ? ' selected' : ''}>${v === 0 ? 'CD: Aus' : 'CD: ' + v + ' s'}</option>`).join('')}</select>`);
-      sel.addEventListener('change', e => { fc.cd = parseInt(e.target.value, 10); onChange(); });
-      row.appendChild(sel);
-    }
+    const st = el(`<span class="statetxt ${fc.def ? 'is-on' : 'is-off'}">${stateTxt(!!fc.def)}</span>`);
+    const sw = mkSwitch(!!fc.def, 'preset', v => {
+      fc.def = v ? 1 : 0;
+      st.textContent = stateTxt(v); st.className = 'statetxt ' + (v ? 'is-on' : 'is-off');
+      onChange();
+    });
+    row.appendChild(sw); row.appendChild(st);
     body.appendChild(row);
+
+    // Auto-Ping: Cooldown-Erklärung, Start-Stufe und eigener Max-Wert
+    if (F.id === 'autoping' && fc.on) {
+      const box = el(`<div class="featextra"></div>`);
+      box.appendChild(el(`<div class="hint">${t('feat.cd.explain')}</div>`));
+      const maxRow = el(`<div class="row"><label>${t('feat.cd.maxLabel')}</label>
+        <input type="number" class="numin" min="1" max="30" value="${fc.cdMax}"></div>`);
+      const maxInp = maxRow.querySelector('input');
+      maxInp.addEventListener('change', () => {
+        let v = parseInt(maxInp.value, 10);
+        if (!(v >= 1)) v = 5; if (v > 30) v = 30;
+        fc.cdMax = v; refreshBody('features'); onChange();
+      });
+      box.appendChild(maxRow);
+      const cdOpts = [0, 1, 2, 3, 4, 5].map(v =>
+        `<option value="${v}"${fc.cd === v ? ' selected' : ''}>${v === 0 ? t('feat.cd.off') : cdSecLabel(v, fc.cdMax)}</option>`).join('');
+      const cdRow = el(`<div class="row"><label>Auto-Ping CD</label><select>${cdOpts}</select></div>`);
+      cdRow.querySelector('select').addEventListener('change', e => { fc.cd = parseInt(e.target.value, 10); onChange(); });
+      box.appendChild(cdRow);
+      if (fc.cdMax !== 5) box.appendChild(el(`<div class="hint">${t('feat.cd.note')}</div>`));
+      body.appendChild(box);
+    }
   }
 }
 
@@ -2383,11 +3051,11 @@ function applyExclusions(id, key) {
   if (id === 'dropjump' && key === 'jump' && p.dropjump.jump) p.dropjump.drop = 0;
 }
 
-// ---- Effektive Seitenliste (wie im Generator) ----
+// ---- Effektive Seitenliste (wie im Generator, in cfg.order-Reihenfolge) ----
 function effectivePages() {
   const featsOn = FEATS.filter(f => cfg.pages.features.feats[f.id].on)
     .filter(f => f.id !== 'gunswap' || cfg.pages.snaphook.on);
-  return MODULES.filter(m => m.id === 'features'
+  return orderedModules(cfg).filter(m => m.id === 'features'
     ? (cfg.pages.features.on && featsOn.length > 0)
     : cfg.pages[m.id].on);
 }
@@ -2397,13 +3065,13 @@ function validate() {
   const warns = [];
   const p = cfg.pages;
   const sel = effectivePages();
-  if (sel.length === 0) warns.push('Keine Seite ausgewählt – es kann kein Script erzeugt werden.');
+  if (sel.length === 0) warns.push(t('w.noPage'));
   const featsOn = FEATS.filter(f => p.features.feats[f.id].on);
-  if (p.features.on && featsOn.length === 0) warns.push('FEATURES-Seite ist an, aber kein Feature gewählt – die Seite wird automatisch weggelassen.');
-  if (p.features.feats.gunswap.on && !p.snaphook.on) warns.push('GUN-SWAP braucht die SNAP-HOOK-Seite – das Feature wird ohne sie weggelassen.');
-  if (p.smart.on && !p.recoil.on) warns.push('Hinweis: SMART RECOIL ohne STD RECOIL – der Y-Wert wird dann nur über die Smart-Seite (rechter Stick) eingestellt.');
-  if (p.features.on && p.features.feats.flipped.on && p.features.feats.flipped.def) warns.push('FLIPPED ist als Standard AN – das Menü öffnet dann mit LT/L2 statt LB/L1!');
-  if (!cfg.screensaver) warns.push('Hinweis: Ohne Bildschirmschoner bleibt das OLED dauerhaft an (Einbrenn-Risiko bei sehr langen Sessions).');
+  if (p.features.on && featsOn.length === 0) warns.push(t('w.featEmpty'));
+  if (p.features.feats.gunswap.on && !p.snaphook.on) warns.push(t('w.gunswapNoSnap'));
+  if (p.smart.on && !p.recoil.on) warns.push(t('w.smartNoRecoil'));
+  if (p.features.on && p.features.feats.flipped.on && p.features.feats.flipped.def) warns.push(t('w.flippedDefault'));
+  if (!cfg.screensaver) warns.push(t('w.noSaver'));
   return warns;
 }
 
@@ -2423,17 +3091,23 @@ function updateCards() {
   sel.forEach((m, k) => { nums[m.id] = k + 1; });
   for (const m of MODULES) {
     const card = cardEls[m.id];
+    if (!card) continue;
     const on = !!nums[m.id];
     card.classList.toggle('on', on);
     card.classList.toggle('off', !on);
-    card.querySelector('[data-role=num]').textContent = on ? 'S. ' + nums[m.id] : '—';
+    card.querySelector('[data-role=num]').textContent = on ? '#' + nums[m.id] : '—';
     const pageChk = card.querySelector('[data-role=pageon]');
-    if (m.id === 'features') pageChk.checked = cfg.pages.features.on;
+    if (m.id === 'features') {
+      pageChk.checked = cfg.pages.features.on;
+      const ms = card.querySelector('[data-role=masterstate]');
+      ms.textContent = stateTxt(cfg.pages.features.on);
+      ms.className = 'statetxt ' + (cfg.pages.features.on ? 'is-on' : 'is-off');
+    }
   }
   // Gun-Swap-Zeile ausgrauen, wenn Snap Hook fehlt
   const gsRow = cardEls.features.querySelector('[data-feat=gunswap]');
-  gsRow.classList.toggle('disabled', !cfg.pages.snaphook.on);
-  document.getElementById('pageCount').innerHTML = `<b>${sel.length}</b> von ${MODULES.length} Seiten im Script`;
+  if (gsRow) gsRow.classList.toggle('disabled', !cfg.pages.snaphook.on);
+  document.getElementById('pageCount').innerHTML = t('pageCount', { n: sel.length, total: MODULES.length });
   document.getElementById('footerDiscord').textContent = cfg.discord;
 }
 
@@ -2451,44 +3125,79 @@ function updatePreview() {
   const stats = document.getElementById('previewStats');
   const ta = document.getElementById('preview');
   if (effectivePages().length === 0) {
-    stats.textContent = 'Keine Seiten gewählt.';
+    stats.textContent = t('preview.none');
     ta.value = '';
     return;
   }
   try {
     const code = generateGPC(cfg);
     const bytes = new Blob([code]).size;
-    stats.textContent = `${code.split('\n').length} Zeilen · ${(bytes / 1024).toFixed(1)} kB · Config-ID ${configHash(cfg)}`;
+    stats.textContent = t('preview.stats', { lines: code.split('\n').length, kb: (bytes / 1024).toFixed(1), id: configHash(cfg) });
     ta.value = code;
   } catch (err) {
-    stats.textContent = 'Fehler bei der Generierung: ' + err.message;
+    stats.textContent = 'Error: ' + err.message;
     ta.value = String(err.stack || err);
   }
 }
 
 // ---- Globale Felder ----
 function wireGlobals() {
-  // on*-Zuweisungen statt addEventListener: bleibt bei rebuildUI() idempotent
-  for (let i = 0; i < 3; i++) {
-    const inp = document.getElementById('ver' + (i + 1));
-    inp.value = cfg.version[i];
-    inp.oninput = () => {
-      const d = inp.value.replace(/\D/g, '').slice(-1);
-      inp.value = d;
-      cfg.version[i] = d === '' ? 0 : parseInt(d, 10);
-      onChange();
-    };
-  }
   const ps5 = document.getElementById('ps5');
   ps5.value = String(cfg.ps5);
   ps5.onchange = () => { cfg.ps5 = parseInt(ps5.value, 10); onChange(); };
   const saver = document.getElementById('screensaver');
   saver.checked = cfg.screensaver;
   saver.onchange = () => { cfg.screensaver = saver.checked; onChange(); };
-  const dc = document.getElementById('discord');
-  dc.value = cfg.discord;
-  dc.oninput = () => { cfg.discord = dc.value; onChange(); };
 }
+
+// ---- Sprache anwenden: alle statischen Texte + Karten neu ----
+function applyLang(lang) {
+  cfg.lang = LANGS.includes(lang) ? lang : 'en';
+  saveCfg();
+  document.documentElement.lang = cfg.lang;
+  document.documentElement.dir = cfg.lang === 'ar' ? 'rtl' : 'ltr';
+  const set = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
+  set('hSub', t('app.sub'));
+  const steps = document.getElementById('steps');
+  steps.innerHTML = [1, 2, 3, 4].map(i => `<div><b>${i}</b> ${t('steps.' + i)}</div>`).join('');
+  set('hGlobals', t('globals.h'));
+  set('lblPlatform', t('globals.platform'));
+  set('lblSaver', t('globals.saver'));
+  set('warnHead', t('warn.h'));
+  set('prevHeadTxt', t('preview.h'));
+  set('infoBtn', t('info.btn'));
+  set('footerBase', t('footer.base'));
+  set('download', t('btn.download'));
+  set('exportPreset', t('btn.export'));
+  set('importPreset', t('btn.import'));
+  set('resetCfg', t('btn.reset'));
+  const ta = document.getElementById('preview');
+  document.getElementById('togglePreview').textContent = (ta.style.display === 'none') ? t('preview.show') : t('preview.hide');
+  document.getElementById('langSel').value = cfg.lang;
+  document.getElementById('legend').innerHTML =
+    `<div class="legend-title">${t('legend.title')}</div>` +
+    `<div class="legend-item"><span class="chip chip-master"></span> ${t('legend.master')}</div>` +
+    `<div class="legend-item"><span class="chip chip-preset"></span> ${t('legend.preset')}</div>`;
+  renderCards();
+  wireGlobals();
+  onChange();
+}
+
+// ---- Info-Modal ----
+function buildInfo() {
+  const body = document.getElementById('infoBody');
+  const nl2 = s => s.split('\n').map(x => `<p>${x}</p>`).join('');
+  let html = `<p class="info-intro">${t('info.intro')}</p>`;
+  html += `<h3>${t('info.navTitle')}</h3>${nl2(t('info.nav'))}`;
+  html += `<h3>${t('info.profTitle')}</h3>${nl2(t('info.prof'))}`;
+  html += `<h3>${t('info.pagesTitle')}</h3>`;
+  for (const m of MODULES) html += `<div class="info-page"><b>${m.name}</b><p>${t('ip.' + m.id)}</p></div>`;
+  body.innerHTML = html;
+  document.getElementById('infoTitle').textContent = t('info.title');
+  document.getElementById('infoClose').title = t('info.close');
+}
+function openInfo() { buildInfo(); document.getElementById('infoModal').style.display = 'flex'; }
+function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
 // ---- Aktionen ----
 function downloadBlob(name, text, mime) {
@@ -2521,41 +3230,39 @@ function wireActions() {
         mergeCfg(base, JSON.parse(reader.result));
         cfg = base;
         saveCfg();
-        rebuildUI();
+        applyLang(cfg.lang);
       } catch (e) {
-        alert('Preset konnte nicht gelesen werden: ' + e.message);
+        alert(t('import.err', { msg: e.message }));
       }
       fileInp.value = '';
     };
     reader.readAsText(file);
   });
   document.getElementById('resetCfg').addEventListener('click', () => {
-    if (!confirm('Alle Einstellungen auf die RAW-40.0-Standardwerte zurücksetzen?')) return;
+    if (!confirm(t('reset.confirm'))) return;
+    const keepLang = cfg.lang;
     cfg = defaultCfg();
+    cfg.lang = keepLang;
     saveCfg();
-    rebuildUI();
+    applyLang(cfg.lang);
   });
   const tp = document.getElementById('togglePreview');
   tp.addEventListener('click', () => {
     const ta = document.getElementById('preview');
     const show = ta.style.display === 'none';
     ta.style.display = show ? '' : 'none';
-    tp.textContent = show ? 'verbergen' : 'anzeigen';
+    tp.textContent = show ? t('preview.hide') : t('preview.show');
   });
-}
-
-function rebuildUI() {
-  renderCards();
-  wireGlobals();
-  onChange();
+  document.getElementById('langSel').addEventListener('change', e => applyLang(e.target.value));
+  document.getElementById('infoBtn').addEventListener('click', openInfo);
+  document.getElementById('infoClose').addEventListener('click', closeInfo);
+  document.getElementById('infoBackdrop').addEventListener('click', closeInfo);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfo(); });
 }
 
 // ---- Start ----
-renderCards();
-wireGlobals();
 wireActions();
-onChange();
-updatePreview();
+applyLang(cfg.lang);
 </script>
 </body>
 </html>
